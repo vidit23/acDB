@@ -1,17 +1,26 @@
-# acDB
-#### Project for DBMS course
+We will run your programs on test cases of our choosing. For ease of parsing there will be one operation per line. 
 
-Given ordered tables (array-tables) whose rows consist of strings and integers, you are to write a program which will:
-
-1. Perform the basic operations of relational algebra: selection, projection, join, group by, and count, sum and avg aggregates. The comparators for select and join will be = <, >, ! =, ≥, ≤
-2. Because the array-tables are potentially ordered, you can sort an arraytable by one or more columns, and running moving sums and average aggregates on a column of an array-table.
-3. Import a vertical bar delimited file into an array-table (in the same order), export from an array-table to a file preserving its order, and assign the result of a query to an array-table.
-4. Each operation will be on a single line. Each time you execute a line, you should print the time it took to execute.
-5. You will support in memory B-trees and hash structures. You are welcome to take those implementations from wherever you can find them, but you must say where.
-6. Your program should be written in python or java. You will hand in clean and well structured source code in which each function has a header that says:
-  - what the function does
-  - what its inputs are and what they mean
-  - what the outputs are and mean
-  - any side effects to globals.
-7. You must ensure that your software runs on the Courant Institute (cims) machine crunchy5.cims.nyu.edu
-8. You may NOT use any relational algebra or SQL library or system (e.g. no SQLite, no mySQL, no other relational database system, no Pandas ). Stick pretty much to the standard stuff (e.g. in Python: numpy, core language features, string manipulation, random number generators, and data structure support for in memory B-trees and hash structures). You may not use anyone else’s code (other than for the data structure implementation). Doing so will constitute plagiarism.
+Input | Meaning
+-------------------------------------------  | ----------------------------------------
+R := inputfromfile(sales1)                   | import vertical bar delimited foo, first line has column headers. Suppose they are saleid, itemid, customerid, storeid, time, qty, pricerange
+R1 := select(R, (time > 50) or (qty < 30))   | select * from R where time > 50 or qty < 30
+R2 := project(R1, saleid, qty, pricerange)   | select saleid, qty, pricerange from R1
+R3 := avg(R1, qty)                           | select avg(qty) from R1
+R4 := sumgroup(R1, time, qty)                | select qty, sum(time) from R1 group by qty
+R5 := sumgroup(R1, qty, time, pricerange)    | select sum(qty), time, pricerange from R1 group by time, pricerange
+R6 := avggroup(R1, qty, pricerange)          | select avg(qty), pricerange from R1 group by by pricerange
+S := inputfromfile(sales2)                   | suppose column headers are saleid, I, C, S, T, Q, P
+T := join(R, S, R.customerid = S.C)          | select * from R, S where R.customerid = S.C
+T1 := join(R1, S, R1.qty > S.Q)              | select * from R1, S where R1.qty > S.Q
+T2 := sort(T1, S_C)                          | sort T1 by S_C
+T2prime := sort(T1, R1_time, S_C)            | sort T1 by R_itemid, S_C (in that order)
+T3 := movavg(T2prime, R1_qty, 3)             | perform the three item moving average of T2prime on column R_qty. This will be as long as R_qty with the three way moving average of 4 8 9 7 being 4 6 7 8
+T4 := movsum(T2prime, R1_qty, 5)             | perform the five item moving sum of T2prime on column R_qty
+Q1 := select(R, qty = 5)                     | select * from R where qty=5 
+Btree(R, qty)                                | create an index on R based on column qty. Equality selections and joins on R should use the index.
+Q2 := select(R, qty = 5)                     | this should use the index
+Q3 := select(R, itemid = 7)                  | select * from R where itemid = 7
+Hash(R,itemid)                               | make hash on some field
+Q4 := select(R, itemid = 7)                  | this should use the hash index
+Q5 := concat(Q4, Q2)                         | concatenate the two tables (must have the same schema). Duplicate rows may result (though not with this example).
+outputtofile(Q5, Q5)                         | This should output the table Q5 into a file
