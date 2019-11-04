@@ -1,3 +1,37 @@
+'''
+R := inputfromfile(sales1) - {   "outputDB": “R”, 
+                                "functionName": “inputfromfie”, 
+                                "input":”sales1”,
+                                "fields": None,
+                                "condition": None
+                             }
+
+R1 := select(R, (time > 50) or (qty != 30) or (qty >= 100)) - { "outputDB": “R1”, 
+                                                "functionName": "select", 
+                                                "input":"R", 
+                                                "fields": [["time", ">", "50"], ["qty", "!=", "30"], ["qty", ">=" ,"100"]]
+                                                "condition": "or" }
+
+R2 := project(R1, saleid, qty, pricerange) - { "outputDB": “R2”, 
+                                            "functionName": "project", 
+                                            "input":"R1", 
+                                            "fields": ["saleid", "qty", "pricerange"],
+                                            "condition": None }
+
+R3 := avg(R1, qty) - { "outputDB": “R3”, 
+                        "functionName": "avg", 
+                        "input":"R1", 
+                        "fields": ["qty"],
+                        "condition": None }
+
+T := join(R, S, R.customerid = S.C) - { "outputDB": “T”, 
+                                    "functionName": "join", 
+                                    "input":"R", 
+                                    "fields": ["S", ["R.customerid", "=", "S.C"]],
+                                    "condition": None }
+Inequalities: =, <, >, !=, >=, <=
+'''
+
 
 def parser(inputQuery):
     meaning = {}
