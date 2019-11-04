@@ -1,3 +1,6 @@
+from parser import parser
+import engine
+
 import numpy as np 
 from tabulate import tabulate
 import warnings
@@ -37,7 +40,10 @@ def sortCollection(collectionName, column, sortedCollectionName):
 # n = np.unique(a[:,0])
 # np.array( [ list(a[a[:,0]==i,1]) for i in n] )
 
-query = input('Enter your query: ')
-print('Running query: ', query)
-readFromFile("R1", "myfile.csv")
-findAverage("R1", "age")
+
+while 1:
+    query = input('Enter your query: ')
+    if query == 'quit':
+        break
+    meaning = parser(query)
+    print('Extracted meaning: ', meaning)
