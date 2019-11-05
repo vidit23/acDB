@@ -1,40 +1,13 @@
 from parser import parser
 import engine
 
-import numpy as np 
-from tabulate import tabulate
-import warnings
-warnings.filterwarnings("ignore", category = np.VisibleDeprecationWarning) 
+import numpy as np
 
-allCollections = {}
-
-def printData(collection):
-    headers = collection.dtype.names
-    table = tabulate(collection, headers, tablefmt="grid")
-    print(table)
-
-def readFromFile(collectionName, readFromFile):
-    readDB = np.genfromtxt(readFromFile, dtype = None, delimiter = '|', names=True, autostrip=True)
-    allCollections[collectionName] = readDB
-
-def findAverage(collectionName, column):
-    col = allCollections[collectionName][column] 
-    mean = np.mean(col)
-    print("The Mean for the column " + column + " is " + str(mean))
-
-def findMax(collectionName, column):
-    col = allCollections[collectionName][column] 
-    colMax = np.max(col)
-    print("The Maximum for the column " + column + " is " + str(colMax))
-
-def findSum(collectionName, column):
-    col = allCollections[collectionName][column] 
-    colSum = np.sum(col)
-    print("The Sum for the column " + column + " is " + str(colSum))
-
-def sortCollection(collectionName, column, sortedCollectionName):
-    sortedCollection = np.sort(allCollections[collectionName], order=column)
-    allCollections[sortedCollectionName] = sortedCollection
+def functionalityChooser(queryMeaning):
+    if queryMeaning["functionName"] == "inputfromfile":
+        engine.readFromFile(queryMeaning["outputDB"], queryMeaning["input"])
+    elif queryMeaning["functionName"] == "project":
+        engine.project(queryMeaning["outputDB"], queryMeaning["input"], queryMeaning["fields"])
 
 # groupby function 
 # n = np.unique(a[:,0])
@@ -45,5 +18,16 @@ while 1:
     query = input('Enter your query: ')
     if query == 'quit':
         break
-    meaning = parser(query)
-    print('Extracted meaning: ', meaning)
+    queryMeaning = parser(query)
+    print('Extracted meaning: ', queryMeaning)
+    functionalityChooser({"outputDB": 'R', 
+                        "functionName": 'inputfromfile', 
+                        "input":'myfile.csv',
+                        "fields": None,
+                        "condition": None })
+    
+    functionalityChooser({"outputDB": 'R1', 
+                        "functionName": 'project', 
+                        "input":'R',
+                        "fields": ['id', 'name'],
+                        "condition": None })

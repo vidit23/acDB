@@ -1,11 +1,22 @@
-def printData(collection):
-    headers = collection.dtype.names
-    table = tabulate(collection, headers, tablefmt="grid")
+import numpy as np
+from tabulate import tabulate
+import warnings
+warnings.filterwarnings("ignore", category = np.VisibleDeprecationWarning)
+
+allCollections = {}
+
+def readFromFile(outputCollection, readFromFile):
+    readDB = np.genfromtxt(readFromFile, dtype = None, delimiter = '|', names = True, autostrip = True)
+    allCollections[outputCollection] = readDB
+
+def printTable(collectionName):
+    headers = collectionName.dtype.names
+    table = tabulate(collectionName, headers, tablefmt = "grid")
     print(table)
 
-def readFromFile(collectionName, readFromFile):
-    readDB = np.genfromtxt(readFromFile, dtype = None, delimiter = '|', names=True, autostrip=True)
-    allCollections[collectionName] = readDB
+def project(outputCollection, collectionName, fields):
+    allCollections[outputCollection] = allCollections[collectionName][fields]
+    printTable(allCollections[outputCollection])
 
 def findAverage(collectionName, column):
     col = allCollections[collectionName][column] 
