@@ -6,8 +6,8 @@ warnings.filterwarnings("ignore", category = np.VisibleDeprecationWarning)
 allCollections = {}
 
 def readFromFile(outputCollection, readFromFile):
-    readDB = np.genfromtxt(readFromFile, dtype = None, delimiter = '|', names = True, autostrip = True)
-    allCollections[outputCollection] = readDB
+    collection = np.genfromtxt(readFromFile, dtype = None, delimiter = '|', names = True, autostrip = True)
+    allCollections[outputCollection] = collection
 
 def printTable(collectionName):
     headers = collectionName.dtype.names
@@ -17,6 +17,30 @@ def printTable(collectionName):
 def project(outputCollection, collectionName, fields):
     allCollections[outputCollection] = allCollections[collectionName][fields]
     printTable(allCollections[outputCollection])
+
+def select(outputCollection, collectionName, conditions, operator):
+    allResults = []
+    collection = allCollections[collectionName]
+    for condition in conditions:
+        compare = np.asarray([condition[2]]).astype(collection.dtype[condition[0]])
+        if condition[1] == '<':
+            result = collection[condition[0]] < compare
+        elif condition[1] == '>':
+            result = collection[condition[0]] > compare
+        elif condition[1] == '<=':
+            result = collection[condition[0]] <= compare
+        elif condition[1] == '>=':
+            result = collection[condition[0]] >= compare
+        elif condition[1] == '!=':
+            result = collection[condition[0]] != compare
+        elif condition[1] == '=':
+            result = collection[condition[0]] == compare
+        allResults.append(result)
+    allResults = np.asarray(allResults)
+    if operator == 'or':
+        allCollections[outputCollection] = np.any(allResults, axis = 0)
+    elif operator == 'and':
+        allCollections[outputCollection] = np.all(allResults, axis = 0)
 
 def findAverage(collectionName, column):
     col = allCollections[collectionName][column] 
