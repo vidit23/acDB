@@ -21,6 +21,24 @@ def readFromFile(outputCollection, readFromFile):
     allCollections[outputCollection] = collection
 
 
+def createHash(collectionName, column):
+    hashmap = defaultdict(lambda: [])
+    collection = allCollections[collectionName]
+    for row in range(len(collection)):
+        hashmap[collection[row][column]].append(row)
+    hashedKeys[collectionName + '.' + col] = hashmap
+    print('Created a hashmap on ' + column + 'for collection ' + collectionName)
+
+
+def hashMatch(collection, column, value):
+    hashmap = hashedKeys[collection + '.' + column]
+    matchingRows = hashmap[value[0]]
+    matched = np.full(len(allCollections[collection]), False)
+    for i in matchingRows:
+        matched[i] = True
+    return matched
+
+
 def project(outputCollection, collectionName, fields):
     allCollections[outputCollection] = allCollections[collectionName][fields]
     printTable(allCollections[outputCollection])
@@ -48,7 +66,10 @@ def select(outputCollection, collectionName, conditions, operator):
         elif condition[1] == '!=':
             result = collection[condition[0]] != compare
         elif condition[1] == '=':
-            result = collection[condition[0]] == compare
+            if collectionName + '.' + condition[0] in hashedKeys:
+                result = hashMatch(collectionName, condition[0], compare)
+            else:
+                result = collection[condition[0]] == compare
         allResults.append(result)
     allResults = np.asarray(allResults)
     if operator == 'or':
@@ -77,12 +98,3 @@ def findSum(outputCollection, collectionName, column):
     colSum = np.sum(col)
     allCollections[outputCollection] = np.array([(colSum)], dtype=[('sum(' + column + ')', col.dtype)])
     printTable(allCollections[outputCollection])
-
-
-def createHash(collectionName, column):
-    hashmap = defaultdict(lambda: [])
-    collection = allCollections[collectionName]
-    for row in range(len(collection)):
-        hashmap[collection[row][column]].append(row)
-    hashedKeys[collectionName + '.' + col] = hashmap
-    print('Created a hashmap on ' + column + 'for collection ' + collectionName)
