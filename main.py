@@ -27,7 +27,10 @@ def functionalityChooser(queryMeaning):
         engine.findSum(queryMeaning['outputDB'], queryMeaning['input'], queryMeaning['fields'][0])
     elif queryMeaning['functionName'] == 'Hash':
         # Create a hashmap for a particular column
-        engine.createHash(queryMeaning['input'], queryMeaning['fields'])
+        engine.createHash(queryMeaning['input'], queryMeaning['fields'][0])
+    elif queryMeaning['functionName'] == 'BTree':
+        # Create a hashmap for a particular column
+        engine.createBTree(queryMeaning['input'], queryMeaning['fields'][0])
 
 # groupby function 
 # n = np.unique(a[:,0])
@@ -75,3 +78,21 @@ while 1:
                         'input':'R',
                         'fields': ['sal'],
                         'condition': None })
+
+    functionalityChooser({'outputDB': None, 
+                        'functionName': 'Hash', 
+                        'input':'R',
+                        'fields': ['name'],
+                        'condition': None })
+
+    functionalityChooser({'outputDB': None, 
+                        'functionName': 'BTree', 
+                        'input':'R',
+                        'fields': ['age'],
+                        'condition': None })
+
+    functionalityChooser({'outputDB': 'R7', 
+                        'functionName': 'select', 
+                        'input':'R',
+                        'fields': [['name', '=', 'vidit'],['age', '=', '23']],
+                        'condition': 'or' })

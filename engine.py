@@ -1,3 +1,4 @@
+from BTrees.OOBTree import OOBTree
 from collections import defaultdict
 import numpy as np
 from tabulate import tabulate
@@ -7,7 +8,7 @@ warnings.filterwarnings("ignore", category = np.VisibleDeprecationWarning)
 
 allCollections = {}
 hashedKeys = {}
-btreedKeys = {}
+bTreedKeys = {}
 
 
 def printTable(collectionName):
@@ -21,24 +22,6 @@ def readFromFile(outputCollection, readFromFile):
     allCollections[outputCollection] = collection
 
 
-def createHash(collectionName, column):
-    hashmap = defaultdict(lambda: [])
-    collection = allCollections[collectionName]
-    for row in range(len(collection)):
-        hashmap[collection[row][column]].append(row)
-    hashedKeys[collectionName + '.' + col] = hashmap
-    print('Created a hashmap on ' + column + 'for collection ' + collectionName)
-
-
-def hashMatch(collection, column, value):
-    hashmap = hashedKeys[collection + '.' + column]
-    matchingRows = hashmap[value[0]]
-    matched = np.full(len(allCollections[collection]), False)
-    for i in matchingRows:
-        matched[i] = True
-    return matched
-
-
 def project(outputCollection, collectionName, fields):
     allCollections[outputCollection] = allCollections[collectionName][fields]
     printTable(allCollections[outputCollection])
@@ -50,27 +33,83 @@ def sortCollection(outputCollection, collectionName, column):
     printTable(allCollections[outputCollection])
 
 
+def createHash(collectionName, column):
+    hashmap = defaultdict(lambda: [])
+    collection = allCollections[collectionName]
+    for row in range(len(collection)):
+        hashmap[collection[row][column]].append(row)
+    hashedKeys[collectionName + '.' + column] = hashmap
+    print('Created a hashmap on ' + column + 'for collection ' + collectionName)
+
+
+def hashMatch(collection, column, value):
+    hashmap = hashedKeys[collection + '.' + column]
+    matchingRows = hashmap[value]
+    matched = np.full(len(allCollections[collection]), False)
+    for i in matchingRows:
+        matched[i] = True
+    return matched
+
+
+def createBTree(collectionName, column):
+    hashmap = defaultdict(lambda: [])
+    collection = allCollections[collectionName]
+    for row in range(len(collection)):
+        hashmap[collection[row][column]].append(row)
+    tree = OOBTree()
+    tree.update(hashmap)
+    bTreedKeys[collectionName + '.' + column] = tree
+    print('Created a hashmap on ' + column + 'for collection ' + collectionName)
+
+
+def bTreeMatch(collection, column, condition, value):
+    bTree = bTreedKeys[collection + '.' + column]
+    matched = np.full(len(allCollections[collection]), False)
+    if condition == '<':
+        matchingRows = bTree.values(max=value, excludemax=True)
+    elif condition == '>':
+        matchingRows = bTree.values(min=value, excludemin=True)
+    elif condition == '<=':
+        matchingRows = bTree.values(max=value, excludemax=False)
+    elif condition == '>=':
+        matchingRows = bTree.values(min=value, excludemin=False)
+    elif condition == '=':
+        if value in bTree:
+            matchingRows = [bTree[value]]
+        else:
+            matchingRows = []
+    for key in matchingRows: 
+        for row in key:
+            matched[row] = True
+    return matched
+
+
 def select(outputCollection, collectionName, conditions, operator):
     allResults = []
     collection = allCollections[collectionName]
     for condition in conditions:
         compare = np.asarray([condition[2]]).astype(collection.dtype[condition[0]])
-        if condition[1] == '<':
-            result = collection[condition[0]] < compare
-        elif condition[1] == '>':
-            result = collection[condition[0]] > compare
-        elif condition[1] == '<=':
-            result = collection[condition[0]] <= compare
-        elif condition[1] == '>=':
-            result = collection[condition[0]] >= compare
-        elif condition[1] == '!=':
-            result = collection[condition[0]] != compare
-        elif condition[1] == '=':
-            if collectionName + '.' + condition[0] in hashedKeys:
-                result = hashMatch(collectionName, condition[0], compare)
-            else:
+        if condition[1] == '=' and collectionName + '.' + condition[0] in hashedKeys:
+            print('Using the Hash generated earlier to check for the value')
+            result = hashMatch(collectionName, condition[0], compare[0])
+        elif condition[1] != '!=' and collectionName + '.' + condition[0] in bTreedKeys:
+            print('Using the Btree generated earlier to check for the value')
+            result = bTreeMatch(collectionName, condition[0], condition[1], compare[0])
+        else:
+            if condition[1] == '<':
+                result = collection[condition[0]] < compare
+            elif condition[1] == '>':
+                result = collection[condition[0]] > compare
+            elif condition[1] == '<=':
+                result = collection[condition[0]] <= compare
+            elif condition[1] == '>=':
+                result = collection[condition[0]] >= compare
+            elif condition[1] == '!=':
+                result = collection[condition[0]] != compare
+            elif condition[1] == '=':
                 result = collection[condition[0]] == compare
         allResults.append(result)
+
     allResults = np.asarray(allResults)
     if operator == 'or':
         allCollections[outputCollection] = np.extract(np.any(allResults, axis = 0), collection)
