@@ -9,22 +9,28 @@ allCollections = {}
 hashedKeys = {}
 btreedKeys = {}
 
+
 def printTable(collectionName):
     headers = collectionName.dtype.names
     table = tabulate(collectionName, headers, tablefmt = "grid")
     print(table)
 
+
 def readFromFile(outputCollection, readFromFile):
     collection = np.genfromtxt(readFromFile, dtype = None, delimiter = '|', names = True, autostrip = True)
     allCollections[outputCollection] = collection
+
 
 def project(outputCollection, collectionName, fields):
     allCollections[outputCollection] = allCollections[collectionName][fields]
     printTable(allCollections[outputCollection])
 
+
 def sortCollection(outputCollection, collectionName, column):
     sortedCollection = np.sort(allCollections[collectionName], order=column)
     allCollections[outputCollection] = sortedCollection
+    printTable(allCollections[outputCollection])
+
 
 def select(outputCollection, collectionName, conditions, operator):
     allResults = []
@@ -46,27 +52,32 @@ def select(outputCollection, collectionName, conditions, operator):
         allResults.append(result)
     allResults = np.asarray(allResults)
     if operator == 'or':
-        allCollections[outputCollection] = np.any(allResults, axis = 0)
+        allCollections[outputCollection] = np.extract(np.any(allResults, axis = 0), collection)
     elif operator == 'and':
-        allCollections[outputCollection] = np.all(allResults, axis = 0)
+        allCollections[outputCollection] = np.extract(np.all(allResults, axis = 0), collection)
+    printTable(allCollections[outputCollection])
+
 
 def findAverage(outputCollection, collectionName, column):
     col = allCollections[collectionName][column] 
     mean = np.mean(col)
-    print("The Mean for the column " + column + " is " + str(mean))
     allCollections[outputCollection] = np.array([(mean)], dtype=[('mean(' + column + ')', 'float_')])
+    printTable(allCollections[outputCollection])
+
 
 def findMax(outputCollection, collectionName, column):
     col = allCollections[collectionName][column] 
     colMax = np.max(col)
     allCollections[outputCollection] = np.array([(colMax)], dtype=[('max(' + column + ')', col.dtype)])
-    print("The Maximum for the column " + column + " is " + str(colMax))
+    printTable(allCollections[outputCollection])
+
 
 def findSum(outputCollection, collectionName, column):
     col = allCollections[collectionName][column] 
     colSum = np.sum(col)
     allCollections[outputCollection] = np.array([(colSum)], dtype=[('sum(' + column + ')', col.dtype)])
-    print("The Sum for the column " + column + " is " + str(colSum))
+    printTable(allCollections[outputCollection])
+
 
 def createHash(collectionName, column):
     hashmap = defaultdict(lambda: [])

@@ -18,13 +18,13 @@ def functionalityChooser(queryMeaning):
         engine.select(queryMeaning['outputDB'], queryMeaning['input'], queryMeaning['fields'], queryMeaning['condition'])
     elif queryMeaning['functionName'] == 'avg':
         # Find the average value of a column
-        engine.findAverage(queryMeaning['outputDB'], queryMeaning['input'], queryMeaning['fields'])
+        engine.findAverage(queryMeaning['outputDB'], queryMeaning['input'], queryMeaning['fields'][0])
     elif queryMeaning['functionName'] == 'max':
         # Find the Maximum value of a column
-        engine.findMax(queryMeaning['outputDB'], queryMeaning['input'], queryMeaning['fields'])
+        engine.findMax(queryMeaning['outputDB'], queryMeaning['input'], queryMeaning['fields'][0])
     elif queryMeaning['functionName'] == 'sum':
         # Find the sum of all the values in a column
-        engine.findSum(queryMeaning['outputDB'], queryMeaning['input'], queryMeaning['fields'])
+        engine.findSum(queryMeaning['outputDB'], queryMeaning['input'], queryMeaning['fields'][0])
     elif queryMeaning['functionName'] == 'Hash':
         # Create a hashmap for a particular column
         engine.createHash(queryMeaning['input'], queryMeaning['fields'])
@@ -49,17 +49,29 @@ while 1:
     functionalityChooser({'outputDB': 'R1', 
                         'functionName': 'project', 
                         'input':'R',
-                        'fields': ['id', 'name'],
+                        'fields': ['id', 'age'],
                         'condition': None })
     
     functionalityChooser({'outputDB': 'R3', 
                         'functionName': 'select', 
                         'input':'R',
-                        'fields': [[],[],[]],
+                        'fields': [['job', '=', 'ba'],['sal', '>', '100']],
                         'condition': 'or' })
 
-    functionalityChooser({'outputDB': 'R1', 
-                        'functionName': 'project', 
+    functionalityChooser({'outputDB': 'R4', 
+                        'functionName': 'avg', 
                         'input':'R',
-                        'fields': ['id', 'name'],
+                        'fields': ['sal'],
+                        'condition': None })
+
+    functionalityChooser({'outputDB': 'R5', 
+                        'functionName': 'sum', 
+                        'input':'R',
+                        'fields': ['sal'],
+                        'condition': None })
+
+    functionalityChooser({'outputDB': 'R6', 
+                        'functionName': 'max', 
+                        'input':'R',
+                        'fields': ['sal'],
                         'condition': None })
