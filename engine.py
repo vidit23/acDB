@@ -1,6 +1,7 @@
 from BTrees.OOBTree import OOBTree
 from collections import defaultdict
 import numpy as np
+from numpy.lib import recfunctions
 from tabulate import tabulate
 
 import warnings
@@ -136,4 +137,21 @@ def findSum(outputCollection, collectionName, column):
     col = allCollections[collectionName][column] 
     colSum = np.sum(col)
     allCollections[outputCollection] = np.array([(colSum)], dtype=[('sum(' + column + ')', col.dtype)])
+    printTable(allCollections[outputCollection])
+
+def findSumByGroup(outputCollection, collectionName, column, groupBy):
+    collection = allCollections[collectionName]
+    uniqueCombinations = np.unique(collection[groupBy])
+    groupBySums = np.array( [ np.sum(collection[collection[groupBy] == row][column]) for row in uniqueCombinations] )
+    groupedCollection = recfunctions.append_fields(uniqueCombinations, 'sum(' + column + ')', groupBySums, usemask=False)
+    allCollections[outputCollection] = groupedCollection
+    printTable(allCollections[outputCollection])
+
+
+def findAverageByGroup(outputCollection, collectionName, column, groupBy):
+    collection = allCollections[collectionName]
+    uniqueCombinations = np.unique(collection[groupBy])
+    groupByAvgs = np.array( [ np.mean(collection[collection[groupBy] == row][column]) for row in uniqueCombinations] )
+    groupedCollection = recfunctions.append_fields(uniqueCombinations, 'avg(' + column + ')', groupByAvgs, usemask=False)
+    allCollections[outputCollection] = groupedCollection
     printTable(allCollections[outputCollection])

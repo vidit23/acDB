@@ -25,6 +25,12 @@ def functionalityChooser(queryMeaning):
     elif queryMeaning['functionName'] == 'sum':
         # Find the sum of all the values in a column
         engine.findSum(queryMeaning['outputDB'], queryMeaning['input'], queryMeaning['fields'][0])
+    elif queryMeaning['functionName'] == 'sumgroup':
+        # Find the sum of all the values in a column after grouping
+        engine.findSumByGroup(queryMeaning['outputDB'], queryMeaning['input'], queryMeaning['fields'][0], queryMeaning['fields'][1:])
+    elif queryMeaning['functionName'] == 'avggroup':
+        # Find the average of all the values in a column after grouping
+        engine.findAverageByGroup(queryMeaning['outputDB'], queryMeaning['input'], queryMeaning['fields'][0], queryMeaning['fields'][1:])
     elif queryMeaning['functionName'] == 'Hash':
         # Create a hashmap for a particular column
         engine.createHash(queryMeaning['input'], queryMeaning['fields'][0])
@@ -96,3 +102,15 @@ while 1:
                         'input':'R',
                         'fields': [['name', '=', 'vidit'],['age', '=', '23']],
                         'condition': 'or' })
+                
+    functionalityChooser({'outputDB': 'R8', 
+                        'functionName': 'sumgroup', 
+                        'input':'R',
+                        'fields': ['sal', 'job', 'name'],
+                        'condition': None })
+
+    functionalityChooser({'outputDB': 'R9', 
+                        'functionName': 'avggroup', 
+                        'input':'R',
+                        'fields': ['sal', 'job'],
+                        'condition': None })
