@@ -40,7 +40,7 @@ def createHash(collectionName, column):
     for row in range(len(collection)):
         hashmap[collection[row][column]].append(row)
     hashedKeys[collectionName + '.' + column] = hashmap
-    print('Created a hashmap on ' + column + 'for collection ' + collectionName)
+    print('Created a hashmap on ' + column + ' for collection ' + collectionName)
 
 
 def hashMatch(collection, column, value):
@@ -60,7 +60,7 @@ def createBTree(collectionName, column):
     tree = OOBTree()
     tree.update(hashmap)
     bTreedKeys[collectionName + '.' + column] = tree
-    print('Created a hashmap on ' + column + 'for collection ' + collectionName)
+    print('Created a hashmap on ' + column + ' for collection ' + collectionName)
 
 
 def bTreeMatch(collection, column, condition, value):
@@ -139,6 +139,7 @@ def findSum(outputCollection, collectionName, column):
     allCollections[outputCollection] = np.array([(colSum)], dtype=[('sum(' + column + ')', col.dtype)])
     printTable(allCollections[outputCollection])
 
+
 def findSumByGroup(outputCollection, collectionName, column, groupBy):
     collection = allCollections[collectionName]
     uniqueCombinations = np.unique(collection[groupBy])
@@ -155,3 +156,35 @@ def findAverageByGroup(outputCollection, collectionName, column, groupBy):
     groupedCollection = recfunctions.append_fields(uniqueCombinations, 'avg(' + column + ')', groupByAvgs, usemask=False)
     allCollections[outputCollection] = groupedCollection
     printTable(allCollections[outputCollection])
+
+
+def findMovingSum(outputCollection, collectionName, column, windowSize):
+    wholeColumn = allCollections[collectionName][column]
+    movingSum = []
+    sumTillHere = 0
+    for rowNum in range(len(wholeColumn)):
+        if rowNum < windowSize:
+            sumTillHere += wholeColumn[rowNum]
+        else:
+            sumTillHere -= wholeColumn[rowNum - windowSize]
+            sumTillHere += wholeColumn[rowNum]
+        movingSum.append(sumTillHere)
+    allCollections[outputCollection] = np.array(movingSum, dtype=[('movsum(' + column + ')', wholeColumn.dtype)])
+    printTable(allCollections[outputCollection])
+
+
+def findMovingAverage(outputCollection, collectionName, column, windowSize):
+    wholeColumn = allCollections[collectionName][column]
+    movingAverage = []
+    sumTillHere = 0
+    for rowNum in range(len(wholeColumn)):
+        if rowNum < windowSize:
+            sumTillHere += wholeColumn[rowNum]
+            movingAverage.append(sumTillHere / (rowNum + 1))
+        else:
+            sumTillHere -= wholeColumn[rowNum - windowSize]
+            sumTillHere += wholeColumn[rowNum]
+            movingAverage.append(sumTillHere / windowSize)
+    allCollections[outputCollection] = np.array(movingAverage, dtype=[('movavg(' + column + ')', 'float_')])
+    printTable(allCollections[outputCollection])
+

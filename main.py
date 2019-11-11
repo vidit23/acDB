@@ -31,6 +31,12 @@ def functionalityChooser(queryMeaning):
     elif queryMeaning['functionName'] == 'avggroup':
         # Find the average of all the values in a column after grouping
         engine.findAverageByGroup(queryMeaning['outputDB'], queryMeaning['input'], queryMeaning['fields'][0], queryMeaning['fields'][1:])
+    elif queryMeaning['functionName'] == 'movsum':
+        # Find the moving sum of all the values in a column based on window size
+        engine.findMovingSum(queryMeaning['outputDB'], queryMeaning['input'], queryMeaning['fields'][0], queryMeaning['fields'][1])
+    elif queryMeaning['functionName'] == 'movavg':
+        # Find the moving average of all the values in a column based on window size
+        engine.findMovingAverage(queryMeaning['outputDB'], queryMeaning['input'], queryMeaning['fields'][0], queryMeaning['fields'][1])
     elif queryMeaning['functionName'] == 'Hash':
         # Create a hashmap for a particular column
         engine.createHash(queryMeaning['input'], queryMeaning['fields'][0])
@@ -113,4 +119,16 @@ while 1:
                         'functionName': 'avggroup', 
                         'input':'R',
                         'fields': ['sal', 'job'],
+                        'condition': None })
+
+    functionalityChooser({'outputDB': 'R10', 
+                        'functionName': 'movsum', 
+                        'input':'R',
+                        'fields': ['age', 3],
+                        'condition': None })
+
+    functionalityChooser({'outputDB': 'R11', 
+                        'functionName': 'movavg', 
+                        'input':'R',
+                        'fields': ['sal', 2],
                         'condition': None })
