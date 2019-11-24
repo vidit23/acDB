@@ -15,11 +15,22 @@ hashedKeys = {}
 bTreedKeys = {}
 
 
-def printTable(collection):
+def findDataType(param):
+    try:
+        num = int(param)
+    except ValueError:
+        try:
+            num = float(param)
+        except ValueError:
+            num = str.encode(param)
+    return num
+
+
+def printTable(collection, limit = 10):
     # Finds the column names of the collection
     headers = collection.dtype.names
     # Forms a table in a pretty manner
-    table = tabulate(collection, headers, tablefmt = "grid")
+    table = tabulate(collection[: limit], headers, tablefmt = "grid")
     print(table)
     print("Number of rows returned: " + str(len(collection)))
 
@@ -35,7 +46,7 @@ def readFromFile(outputCollection, readFromFile):
 def outputToFile(collection, fileName):
     prefix = ''
     headers = allCollections[collection].dtype.names
-    for name in headers.names:
+    for name in headers:
         prefix += ('|' + name)
         
     with open(fileName, 'w') as filePointer:
@@ -96,7 +107,7 @@ def createBTree(collectionName, column):
     tree = OOBTree()
     tree.update(hashmap)
     bTreedKeys[collectionName + '.' + column] = tree
-    print('Created a hashmap on ' + column + ' for collection ' + collectionName)
+    print('Created a BTree on ' + column + ' for collection ' + collectionName)
 
 
 def bTreeMatch(collection, column, condition, value):
@@ -121,37 +132,83 @@ def bTreeMatch(collection, column, condition, value):
     return matched
 
 
+def findComparatorMeaning(comparator, collection):
+    if comparator in collection.dtype.names:
+        return collection[comparator]
+    elif '+' in comparator:
+        comparator = comparator.split('+')
+        comparator = [i.strip() for i in comparator]
+        if comparator[0] in collection.dtype.names:
+            return collection[comparator[0]] + findDataType(comparator[1])
+        else:
+            return findDataType(comparator[0]) + findDataType(comparator[1])
+    elif '-' in comparator: 
+        comparator = comparator.split('-')
+        comparator = [i.strip() for i in comparator]
+        if comparator[0] in collection.dtype.names:
+            return collection[comparator[0]] + findDataType(comparator[1])
+        else:
+            return findDataType(comparator[0]) + findDataType(comparator[1])
+    elif '*' in comparator: 
+        comparator = comparator.split('*')
+        comparator = [i.strip() for i in comparator]
+        if comparator[0] in collection.dtype.names:
+            return collection[comparator[0]] + findDataType(comparator[1])
+        else:
+            return findDataType(comparator[0]) + findDataType(comparator[1])
+    elif '/' in comparator:
+        comparator = comparator.split('/')
+        comparator = [i.strip() for i in comparator]
+        if comparator[0] in collection.dtype.names:
+            return collection[comparator[0]] + findDataType(comparator[1])
+        else:
+            return findDataType(comparator[0]) + findDataType(comparator[1])
+    else:
+        return findDataType(comparator)
+
+
 def select(outputCollection, collectionName, conditions, operator):
     allResults = []
     collection = allCollections[collectionName]
-    for condition in conditions:
-        compare = np.asarray([condition[2]]).astype(collection.dtype[condition[0]])
+    for condition in conditions:     
         if condition[1] == '=' and collectionName + '.' + condition[0] in hashedKeys:
             print('Using the Hash generated earlier to check for the value')
+            compare = np.asarray([condition[2]]).astype(collection.dtype[condition[0]])
             result = hashMatch(collectionName, condition[0], compare[0])
+        elif condition[1] == '=' and collectionName + '.' + condition[2] in hashedKeys:
+            print('Using the Hash generated earlier to check for the value')
+            compare = np.asarray([condition[0]]).astype(collection.dtype[condition[2]])
+            result = hashMatch(collectionName, condition[2], compare[0])
         elif condition[1] != '!=' and collectionName + '.' + condition[0] in bTreedKeys:
             print('Using the Btree generated earlier to check for the value')
+            compare = np.asarray([condition[2]]).astype(collection.dtype[condition[0]])
             result = bTreeMatch(collectionName, condition[0], condition[1], compare[0])
+        elif condition[1] != '!=' and collectionName + '.' + condition[2] in bTreedKeys:
+            print('Using the Btree generated earlier to check for the value')
+            compare = np.asarray([condition[0]]).astype(collection.dtype[condition[2]])
+            result = bTreeMatch(collectionName, condition[2], condition[1], compare[0])
         else:
+            lhs = findComparatorMeaning(condition[0], collection)
+            rhs = findComparatorMeaning(condition[2], collection)   
             if condition[1] == '<':
-                result = collection[condition[0]] < compare
+                result = lhs < rhs
             elif condition[1] == '>':
-                result = collection[condition[0]] > compare
+                result = lhs > rhs
             elif condition[1] == '<=':
-                result = collection[condition[0]] <= compare
+                result = lhs <= rhs
             elif condition[1] == '>=':
-                result = collection[condition[0]] >= compare
+                result = lhs >= rhs
             elif condition[1] == '!=':
-                result = collection[condition[0]] != compare
+                result = lhs != rhs
             elif condition[1] == '=':
-                result = collection[condition[0]] == compare
+                result = lhs == rhs
         allResults.append(result)
 
     allResults = np.asarray(allResults)
-    if operator == 'or':
-        allCollections[outputCollection] = np.extract(np.any(allResults, axis = 0), collection)
-    elif operator == 'and':
+    if operator == 'and':
         allCollections[outputCollection] = np.extract(np.all(allResults, axis = 0), collection)
+    else:
+        allCollections[outputCollection] = np.extract(np.any(allResults, axis = 0), collection)
     printTable(allCollections[outputCollection])
 
 
