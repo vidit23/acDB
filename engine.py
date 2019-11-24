@@ -7,20 +7,45 @@ from tabulate import tabulate
 import warnings
 warnings.filterwarnings("ignore", category = np.VisibleDeprecationWarning)
 
+# Contains all collections with keys as their name and numpy array as value
 allCollections = {}
+# Stores all the hashes generated in the form "collectionName.column: hashmap" 
 hashedKeys = {}
+# Stores all the BTrees generated in the form "collectionName.column: BTree" 
 bTreedKeys = {}
 
 
 def printTable(collectionName):
+    # Finds the column names of the collection
     headers = collectionName.dtype.names
+    # Forms a table in a pretty manner
     table = tabulate(collectionName, headers, tablefmt = "grid")
     print(table)
 
 
 def readFromFile(outputCollection, readFromFile):
+    # Read data from a file in which the first line is the name of columns and each column is followed by a |
     collection = np.genfromtxt(readFromFile, dtype = None, delimiter = '|', names = True, autostrip = True)
+    # Stores the read collection into a global variable that can be accessed anywhere in this file
     allCollections[outputCollection] = collection
+
+
+def outputToFile(collection, fileName):
+    prefix = ''
+    headers = allCollections[collection].dtype.names
+    for name in headers.names:
+        prefix += ('|' + name)
+        
+    with open(fileName, 'w') as filePointer:
+        filePointer.write(prefix[1:] + '\n')
+        for row in allCollections[collection]:
+            rowInStr = ''
+            for field in row:
+                if type(field) == np.bytes_:
+                    rowInStr += ('|' + bytes.decode(field))
+                else:
+                    rowInStr += ('|' + str(field))
+            filePointer.write(rowInStr[1:] + '\n')
 
 
 def project(outputCollection, collectionName, fields):

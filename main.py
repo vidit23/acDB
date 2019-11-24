@@ -2,11 +2,15 @@ from parser import parser
 import engine
 
 import numpy as np
+import time
 
 def functionalityChooser(queryMeaning):
     if queryMeaning['functionName'] == 'inputfromfile':
         # Read from a file
         engine.readFromFile(queryMeaning['outputDB'], queryMeaning['input'])
+    elif queryMeaning['functionName'] == 'outputtofile':
+        # Output to a file
+        engine.outputToFile(queryMeaning['input'], queryMeaning['fields'][0])
     elif queryMeaning['functionName'] == 'project':
         # Select a particular set of columns from a collection
         engine.project(queryMeaning['outputDB'], queryMeaning['input'], queryMeaning['fields'])
@@ -54,8 +58,14 @@ while 1:
     if query == 'quit':
         break
     queryMeaning = parser(query)
-    print('Extracted meaning: ', queryMeaning)
-    functionalityChooser(queryMeaning)
+    print('\n\n\n\nExtracted meaning: ', queryMeaning)
+    try:
+        startTime = time.time()
+        functionalityChooser(queryMeaning)
+        print("It took " + str(time.time() - startTime) + " seconds to execute this query")
+    except Exception as err:
+        print("There was an error in processing the query")
+        print(err)
     # functionalityChooser({'outputDB': 'R', 
     #                     'functionName': 'inputfromfile', 
     #                     'input':'myfile.csv',
