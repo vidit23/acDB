@@ -17,6 +17,9 @@ def functionalityChooser(queryMeaning):
     elif queryMeaning['functionName'] == 'sort':
         # Sort the collection based on a set of columns
         engine.sortCollection(queryMeaning['outputDB'], queryMeaning['input'], queryMeaning['fields'])
+    elif queryMeaning['functionName'] == 'concat':
+        # Concatenate two collections
+        engine.concatenateCollection(queryMeaning['outputDB'], queryMeaning['input'], queryMeaning['fields'][0])
     elif queryMeaning['functionName'] == 'select':
         # Select rows from a collection based on some conditions
         engine.select(queryMeaning['outputDB'], queryMeaning['input'], queryMeaning['fields'], queryMeaning['condition'])
@@ -47,6 +50,8 @@ def functionalityChooser(queryMeaning):
     elif queryMeaning['functionName'] == 'BTree':
         # Create a hashmap for a particular column
         engine.createBTree(queryMeaning['input'], queryMeaning['fields'][0])
+    else:
+        print('The command ' + queryMeaning['functionName'] + ' is not recognized')
 
 # groupby function 
 # n = np.unique(a[:,0])
@@ -66,6 +71,8 @@ while 1:
     except Exception as err:
         print("There was an error in processing the query")
         print(err)
+
+
     # functionalityChooser({'outputDB': 'R', 
     #                     'functionName': 'inputfromfile', 
     #                     'input':'myfile.csv',

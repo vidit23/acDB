@@ -15,12 +15,13 @@ hashedKeys = {}
 bTreedKeys = {}
 
 
-def printTable(collectionName):
+def printTable(collection):
     # Finds the column names of the collection
-    headers = collectionName.dtype.names
+    headers = collection.dtype.names
     # Forms a table in a pretty manner
-    table = tabulate(collectionName, headers, tablefmt = "grid")
+    table = tabulate(collection, headers, tablefmt = "grid")
     print(table)
+    print("Number of rows returned: " + str(len(collection)))
 
 
 def readFromFile(outputCollection, readFromFile):
@@ -28,6 +29,7 @@ def readFromFile(outputCollection, readFromFile):
     collection = np.genfromtxt(readFromFile, dtype = None, delimiter = '|', names = True, autostrip = True)
     # Stores the read collection into a global variable that can be accessed anywhere in this file
     allCollections[outputCollection] = collection
+    printTable(allCollections[outputCollection])
 
 
 def outputToFile(collection, fileName):
@@ -57,6 +59,15 @@ def sortCollection(outputCollection, collectionName, column):
     sortedCollection = np.sort(allCollections[collectionName], order=column)
     allCollections[outputCollection] = sortedCollection
     printTable(allCollections[outputCollection])
+
+
+def concatenateCollection(outputCollection, collection1, collection2):
+    try:
+        concatenatedCollection = np.concatenate((allCollections[collection1], allCollections[collection2]), axis = 0)
+        allCollections[outputCollection] = concatenatedCollection
+        printTable(allCollections[outputCollection])
+    except:
+        print('The columns do not match')
 
 
 def createHash(collectionName, column):
