@@ -55,80 +55,81 @@ while 1:
         break
     queryMeaning = parser(query)
     print('Extracted meaning: ', queryMeaning)
-    functionalityChooser({'outputDB': 'R', 
-                        'functionName': 'inputfromfile', 
-                        'input':'myfile.csv',
-                        'fields': None,
-                        'condition': None })
+    functionalityChooser(queryMeaning)
+    # functionalityChooser({'outputDB': 'R', 
+    #                     'functionName': 'inputfromfile', 
+    #                     'input':'myfile.csv',
+    #                     'fields': None,
+    #                     'condition': None })
     
-    functionalityChooser({'outputDB': 'R1', 
-                        'functionName': 'project', 
-                        'input':'R',
-                        'fields': ['id', 'age'],
-                        'condition': None })
+    # functionalityChooser({'outputDB': 'R1', 
+    #                     'functionName': 'project', 
+    #                     'input':'R',
+    #                     'fields': ['id', 'age'],
+    #                     'condition': None })
     
-    functionalityChooser({'outputDB': 'R3', 
-                        'functionName': 'select', 
-                        'input':'R',
-                        'fields': [['job', '=', 'ba'],['sal', '>', '100']],
-                        'condition': 'or' })
+    # functionalityChooser({'outputDB': 'R3', 
+    #                     'functionName': 'select', 
+    #                     'input':'R',
+    #                     'fields': [['job', '=', 'ba'],['sal', '>', '100']],
+    #                     'condition': 'or' })
 
-    functionalityChooser({'outputDB': 'R4', 
-                        'functionName': 'avg', 
-                        'input':'R',
-                        'fields': ['sal'],
-                        'condition': None })
+    # functionalityChooser({'outputDB': 'R4', 
+    #                     'functionName': 'avg', 
+    #                     'input':'R',
+    #                     'fields': ['sal'],
+    #                     'condition': None })
 
-    functionalityChooser({'outputDB': 'R5', 
-                        'functionName': 'sum', 
-                        'input':'R',
-                        'fields': ['sal'],
-                        'condition': None })
+    # functionalityChooser({'outputDB': 'R5', 
+    #                     'functionName': 'sum', 
+    #                     'input':'R',
+    #                     'fields': ['sal'],
+    #                     'condition': None })
 
-    functionalityChooser({'outputDB': 'R6', 
-                        'functionName': 'max', 
-                        'input':'R',
-                        'fields': ['sal'],
-                        'condition': None })
+    # functionalityChooser({'outputDB': 'R6', 
+    #                     'functionName': 'max', 
+    #                     'input':'R',
+    #                     'fields': ['sal'],
+    #                     'condition': None })
 
-    functionalityChooser({'outputDB': None, 
-                        'functionName': 'Hash', 
-                        'input':'R',
-                        'fields': ['name'],
-                        'condition': None })
+    # functionalityChooser({'outputDB': None, 
+    #                     'functionName': 'Hash', 
+    #                     'input':'R',
+    #                     'fields': ['name'],
+    #                     'condition': None })
 
-    functionalityChooser({'outputDB': None, 
-                        'functionName': 'BTree', 
-                        'input':'R',
-                        'fields': ['age'],
-                        'condition': None })
+    # functionalityChooser({'outputDB': None, 
+    #                     'functionName': 'BTree', 
+    #                     'input':'R',
+    #                     'fields': ['age'],
+    #                     'condition': None })
 
-    functionalityChooser({'outputDB': 'R7', 
-                        'functionName': 'select', 
-                        'input':'R',
-                        'fields': [['name', '=', 'vidit'],['age', '=', '23']],
-                        'condition': 'or' })
+    # functionalityChooser({'outputDB': 'R7', 
+    #                     'functionName': 'select', 
+    #                     'input':'R',
+    #                     'fields': [['name', '=', 'vidit'],['age', '=', '23']],
+    #                     'condition': 'or' })
                 
-    functionalityChooser({'outputDB': 'R8', 
-                        'functionName': 'sumgroup', 
-                        'input':'R',
-                        'fields': ['sal', 'job', 'name'],
-                        'condition': None })
+    # functionalityChooser({'outputDB': 'R8', 
+    #                     'functionName': 'sumgroup', 
+    #                     'input':'R',
+    #                     'fields': ['sal', 'job', 'name'],
+    #                     'condition': None })
 
-    functionalityChooser({'outputDB': 'R9', 
-                        'functionName': 'avggroup', 
-                        'input':'R',
-                        'fields': ['sal', 'job'],
-                        'condition': None })
+    # functionalityChooser({'outputDB': 'R9', 
+    #                     'functionName': 'avggroup', 
+    #                     'input':'R',
+    #                     'fields': ['sal', 'job'],
+    #                     'condition': None })
 
-    functionalityChooser({'outputDB': 'R10', 
-                        'functionName': 'movsum', 
-                        'input':'R',
-                        'fields': ['age', 3],
-                        'condition': None })
+    # functionalityChooser({'outputDB': 'R10', 
+    #                     'functionName': 'movsum', 
+    #                     'input':'R',
+    #                     'fields': ['age', 3],
+    #                     'condition': None })
 
-    functionalityChooser({'outputDB': 'R11', 
-                        'functionName': 'movavg', 
-                        'input':'R',
-                        'fields': ['sal', 2],
-                        'condition': None })
+    # functionalityChooser({'outputDB': 'R11', 
+    #                     'functionName': 'movavg', 
+    #                     'input':'R',
+    #                     'fields': ['sal', 2],
+    #                     'condition': None })
