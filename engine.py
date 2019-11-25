@@ -28,6 +28,14 @@ def findDataType(param):
     return num
 
 
+def canEval(expression):
+    try:
+        eval(expression)
+        return True
+    except:
+        return False
+
+
 def printTable(collection, limit = 10):
     # Finds the column names of the collection
     headers = collection.dtype.names
@@ -52,7 +60,7 @@ def outputToFile(collection, fileName):
         prefix += ('|' + name)
         
     with open(fileName, 'w') as filePointer:
-        filePointer.write(prefix[1:] + '\n')
+        filePointer.write(prefix[1:])
         for row in allCollections[collection]:
             rowInStr = ''
             for field in row:
@@ -60,7 +68,7 @@ def outputToFile(collection, fileName):
                     rowInStr += ('|' + bytes.decode(field))
                 else:
                     rowInStr += ('|' + str(field))
-            filePointer.write(rowInStr[1:] + '\n')
+            filePointer.write('\n' + rowInStr[1:])
 
 
 def project(outputCollection, collectionName, fields):
@@ -174,22 +182,22 @@ def select(outputCollection, collectionName, conditions, operator):
     collection = allCollections[collectionName]
     for condition in conditions:     
         # TBD: Add Eval for btree and hash
-        if condition[1] == '=' and collectionName + '.' + condition[0] in hashedKeys:
+        if condition[1] == '=' and collectionName + '.' + condition[0] in hashedKeys and canEval(condition[2]):
             print('Using the Hash generated earlier to check for the value')
-            compare = np.asarray([condition[2]]).astype(collection.dtype[condition[0]])
-            result = hashMatch(collectionName, condition[0], compare[0])
-        elif condition[1] == '=' and collectionName + '.' + condition[2] in hashedKeys:
+            compare = eval(condition[2])
+            result = hashMatch(collectionName, condition[0], compare)
+        elif condition[1] == '=' and collectionName + '.' + condition[2] in hashedKeys and canEval(condition[0]):
             print('Using the Hash generated earlier to check for the value')
-            compare = np.asarray([condition[0]]).astype(collection.dtype[condition[2]])
-            result = hashMatch(collectionName, condition[2], compare[0])
-        elif condition[1] != '!=' and collectionName + '.' + condition[0] in bTreedKeys:
+            compare = eval(condition[0])
+            result = hashMatch(collectionName, condition[2], compare)
+        elif condition[1] != '!=' and collectionName + '.' + condition[0] in bTreedKeys and canEval(condition[2]):
             print('Using the Btree generated earlier to check for the value')
-            compare = np.asarray([condition[2]]).astype(collection.dtype[condition[0]])
-            result = bTreeMatch(collectionName, condition[0], condition[1], compare[0])
-        elif condition[1] != '!=' and collectionName + '.' + condition[2] in bTreedKeys:
+            compare = eval(condition[2])
+            result = bTreeMatch(collectionName, condition[0], condition[1], compare)
+        elif condition[1] != '!=' and collectionName + '.' + condition[2] in bTreedKeys and canEval(condition[0]):
             print('Using the Btree generated earlier to check for the value')
-            compare = np.asarray([condition[0]]).astype(collection.dtype[condition[2]])
-            result = bTreeMatch(collectionName, condition[2], condition[1], compare[0])
+            compare = eval(condition[0])
+            result = bTreeMatch(collectionName, condition[2], condition[1], compare)
         else:
             lhs = findComparatorMeaning(condition[0], collection)
             rhs = findComparatorMeaning(condition[2], collection)   
