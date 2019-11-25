@@ -1,7 +1,9 @@
 from BTrees.OOBTree import OOBTree
 from collections import defaultdict
+from copy import copy, deepcopy
 import numpy as np
-from numpy.lib import recfunctions
+from numpy.lib import recfunctions as rfn
+import re
 from tabulate import tabulate
 
 import warnings
@@ -146,23 +148,23 @@ def findComparatorMeaning(comparator, collection):
         comparator = comparator.split('-')
         comparator = [i.strip() for i in comparator]
         if comparator[0] in collection.dtype.names:
-            return collection[comparator[0]] + findDataType(comparator[1])
+            return collection[comparator[0]] - findDataType(comparator[1])
         else:
-            return findDataType(comparator[0]) + findDataType(comparator[1])
+            return findDataType(comparator[0]) - findDataType(comparator[1])
     elif '*' in comparator: 
         comparator = comparator.split('*')
         comparator = [i.strip() for i in comparator]
         if comparator[0] in collection.dtype.names:
-            return collection[comparator[0]] + findDataType(comparator[1])
+            return collection[comparator[0]] * findDataType(comparator[1])
         else:
-            return findDataType(comparator[0]) + findDataType(comparator[1])
+            return findDataType(comparator[0]) * findDataType(comparator[1])
     elif '/' in comparator:
         comparator = comparator.split('/')
         comparator = [i.strip() for i in comparator]
         if comparator[0] in collection.dtype.names:
-            return collection[comparator[0]] + findDataType(comparator[1])
+            return collection[comparator[0]] / findDataType(comparator[1])
         else:
-            return findDataType(comparator[0]) + findDataType(comparator[1])
+            return findDataType(comparator[0]) / findDataType(comparator[1])
     else:
         return findDataType(comparator)
 
@@ -171,6 +173,7 @@ def select(outputCollection, collectionName, conditions, operator):
     allResults = []
     collection = allCollections[collectionName]
     for condition in conditions:     
+        # TBD: Add Eval for btree and hash
         if condition[1] == '=' and collectionName + '.' + condition[0] in hashedKeys:
             print('Using the Hash generated earlier to check for the value')
             compare = np.asarray([condition[2]]).astype(collection.dtype[condition[0]])
@@ -206,10 +209,14 @@ def select(outputCollection, collectionName, conditions, operator):
 
     allResults = np.asarray(allResults)
     if operator == 'and':
-        allCollections[outputCollection] = np.extract(np.all(allResults, axis = 0), collection)
+        finalOutcome = np.extract(np.all(allResults, axis = 0), collection)
     else:
-        allCollections[outputCollection] = np.extract(np.any(allResults, axis = 0), collection)
-    printTable(allCollections[outputCollection])
+        finalOutcome = np.extract(np.any(allResults, axis = 0), collection)
+    if outputCollection == None:
+        return finalOutcome
+    else:
+        allCollections[outputCollection] = finalOutcome
+        printTable(allCollections[outputCollection])
 
 
 def findAverage(outputCollection, collectionName, column):
@@ -237,7 +244,7 @@ def findSumByGroup(outputCollection, collectionName, column, groupBy):
     collection = allCollections[collectionName]
     uniqueCombinations = np.unique(collection[groupBy])
     groupBySums = np.array( [ np.sum(collection[collection[groupBy] == row][column]) for row in uniqueCombinations] )
-    groupedCollection = recfunctions.append_fields(uniqueCombinations, 'sum(' + column + ')', groupBySums, usemask=False)
+    groupedCollection = rfn.append_fields(uniqueCombinations, 'sum(' + column + ')', groupBySums, usemask=False)
     allCollections[outputCollection] = groupedCollection
     printTable(allCollections[outputCollection])
 
@@ -246,7 +253,7 @@ def findAverageByGroup(outputCollection, collectionName, column, groupBy):
     collection = allCollections[collectionName]
     uniqueCombinations = np.unique(collection[groupBy])
     groupByAvgs = np.array( [ np.mean(collection[collection[groupBy] == row][column]) for row in uniqueCombinations] )
-    groupedCollection = recfunctions.append_fields(uniqueCombinations, 'avg(' + column + ')', groupByAvgs, usemask=False)
+    groupedCollection = rfn.append_fields(uniqueCombinations, 'avg(' + column + ')', groupByAvgs, usemask=False)
     allCollections[outputCollection] = groupedCollection
     printTable(allCollections[outputCollection])
 
@@ -281,3 +288,54 @@ def findMovingAverage(outputCollection, collectionName, column, windowSize):
     allCollections[outputCollection] = np.array(movingAverage, dtype=[('movavg(' + column + ')', 'float_')])
     printTable(allCollections[outputCollection])
 
+
+def join(outputCollection, leftCollection, rightCollection, conditions, operator):
+    replaceAll = []
+    for condition in conditions:
+        replace = []
+        if leftCollection in condition[0].split('.'):
+            lhs = condition[0]
+            rhs = condition[2]
+            posOfLeftCollection = 0
+        elif leftCollection in condition[2].split('.'):
+            lhs = condition[2]
+            rhs = condition[0]
+            posOfLeftCollection = 2
+
+        left = re.findall(leftCollection + '.[a-zA-Z_$0-9]+', lhs)
+        splitted_left = left[0].split('.')
+        replace = [posOfLeftCollection, left[0], leftCollection + '_' + splitted_left[1]]
+        right = re.findall(rightCollection + '.[a-zA-Z_$0-9]+', rhs)
+        right = right[0].split('.')
+        condition[2 - posOfLeftCollection] = re.sub(rightCollection + '.[a-zA-Z_$0-9]+', right[1], rhs)
+        replaceAll.append(replace)
+
+    fieldRename = {} 
+    for name in allCollections[leftCollection].dtype.names:
+        fieldRename[name] = leftCollection + '_' + name
+    leftCollectionRenamed = rfn.rename_fields(allCollections[leftCollection], fieldRename)
+
+    fieldRename = {} 
+    for name in allCollections[rightCollection].dtype.names:
+        fieldRename[name] = rightCollection + '_' + name
+    # allCollections['joinTempRenamed'] = rfn.rename_fields(allCollections[rightCollection], fieldRename)
+
+    joinedCollection = []
+    firstTime = 1
+    for row in leftCollectionRenamed:
+        rowCondition = deepcopy(conditions)
+        for i in range(len(rowCondition)):
+            pos = replaceAll[i][0]
+            rowCondition[i][pos] = rowCondition[i][pos].replace(replaceAll[i][1], str(row[replaceAll[i][2]]))
+        columnsThatMatch = select(None, rightCollection, rowCondition, operator)
+        if len(columnsThatMatch) > 0:
+            columnsThatMatch = rfn.rename_fields(columnsThatMatch, fieldRename)
+            joins = rfn.merge_arrays((np.array([row]*len(columnsThatMatch)), columnsThatMatch), flatten = True, usemask = False)
+            if firstTime:
+                joinedCollection = joins
+                firstTime = 0
+            else:
+                joinedCollection = np.concatenate((joinedCollection, joins), axis = 0)
+
+    allCollections[outputCollection] = joinedCollection
+    printTable(allCollections[outputCollection])

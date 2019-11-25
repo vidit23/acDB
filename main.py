@@ -41,16 +41,19 @@ def functionalityChooser(queryMeaning):
         engine.findAverageByGroup(queryMeaning['outputDB'], queryMeaning['input'], queryMeaning['fields'][0], queryMeaning['fields'][1:])
     elif queryMeaning['functionName'] == 'movsum':
         # Find the moving sum of all the values in a column based on window size
-        engine.findMovingSum(queryMeaning['outputDB'], queryMeaning['input'], queryMeaning['fields'][0], queryMeaning['fields'][1])
+        engine.findMovingSum(queryMeaning['outputDB'], queryMeaning['input'], queryMeaning['fields'][0], int(queryMeaning['fields'][1]))
     elif queryMeaning['functionName'] == 'movavg':
         # Find the moving average of all the values in a column based on window size
-        engine.findMovingAverage(queryMeaning['outputDB'], queryMeaning['input'], queryMeaning['fields'][0], queryMeaning['fields'][1])
+        engine.findMovingAverage(queryMeaning['outputDB'], queryMeaning['input'], queryMeaning['fields'][0], int(queryMeaning['fields'][1]))
     elif queryMeaning['functionName'] == 'Hash':
         # Create a hashmap for a particular column
         engine.createHash(queryMeaning['input'], queryMeaning['fields'][0])
     elif queryMeaning['functionName'] == 'BTree':
         # Create a hashmap for a particular column
         engine.createBTree(queryMeaning['input'], queryMeaning['fields'][0])
+    elif queryMeaning['functionName'] == 'join':
+        # Create a hashmap for a particular column
+        engine.join(queryMeaning['outputDB'], queryMeaning['input'], queryMeaning['fields'][0], queryMeaning['fields'][1:], queryMeaning['condition'])
     else:
         print('The command ' + queryMeaning['functionName'] + ' is not recognized')
 
