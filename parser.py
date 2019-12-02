@@ -58,11 +58,11 @@ def parser(inputQuery):
 
     #if the assignment operator is present then "else" happens otherwise if is executed
     if position_assignment_character == -1:
-        print("the length of string is: " + str(length_inputQuery))
-        if position_bracket1 != -1:
-            print ("the position of First bracket: " + str(position_bracket1))
-        if position_braketEnd != -1:
-            print ("the position of Last bracket: " + str(position_braketEnd))
+        # print("the length of string is: " + str(length_inputQuery))
+        # if position_bracket1 != -1:
+        #     print ("the position of First bracket: " + str(position_bracket1))
+        # if position_braketEnd != -1:
+        #     print ("the position of Last bracket: " + str(position_braketEnd))
         #if there is only 1 comma present
         if comma_count != 0 and comma_count == 1: 
             if position_comma != -1:

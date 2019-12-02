@@ -121,11 +121,11 @@ def runningBackendTests():
                         'fields': ['S', ['R.customerid', '=', 'S.C']],
                         'condition': None })
 
-    print('\n\n\n\n\nT1 := join(R1, S, (R1.qty > S.Q) and (R.customerid = S.C))')
+    print('\n\n\n\n\nT1 := join(R1, S, (R1.qty > S.Q) and (R1.customerid = S.C))')
     functionalityChooser({'outputDB': 'T1', 
                         'functionName': 'join', 
                         'input':'R1',
-                        'fields': ['S', ['R1.qty', '>', 'S.Q'], ['S.saleid', '=', 'R1.saleid']],
+                        'fields': ['S', ['R1.qty', '>', 'S.Q'], ['R1.customerid', '=', 'S.C']],
                         'condition': 'and' })
     
     print('\n\n\n\n\nT2 := sort(T1, S_C)')
