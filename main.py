@@ -48,7 +48,7 @@ def functionalityChooser(queryMeaning):
     elif queryMeaning['functionName'] == 'Hash':
         # Create a hashmap for a particular column
         engine.createHash(queryMeaning['input'], queryMeaning['fields'][0])
-    elif queryMeaning['functionName'] == 'BTree':
+    elif queryMeaning['functionName'] == 'Btree':
         # Create a hashmap for a particular column
         engine.createBTree(queryMeaning['input'], queryMeaning['fields'][0])
     elif queryMeaning['functionName'] == 'join':
