@@ -1,9 +1,9 @@
 ### This project tries to emulate how a SQL Database works using Python3. 
 To run the project:
-1. Assuming you have pip installed, run the command "pip3 install -r requirements.txt"
-2. And then, "python3 main.py"
-    - Type "quit" to exit the program
-    - Type "test" to run all the queries given in the sample file
+1. Assuming you have pip installed, run the command `pip3 install -r requirements.txt`
+2. And then, `python3 main.py`
+    - Type `quit` to exit the program
+    - Type `test` to run all the queries given in the sample file
     - Type queries as you see fit.
 
 The commands that are accepted by the system are:
