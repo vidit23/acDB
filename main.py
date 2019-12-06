@@ -36,6 +36,12 @@ def functionalityChooser(queryMeaning):
     elif queryMeaning['functionName'] == 'sumgroup':
         # Find the sum of all the values in a column after grouping
         engine.findSumByGroup(queryMeaning['outputDB'], queryMeaning['input'], queryMeaning['fields'][0], queryMeaning['fields'][1:])
+    elif queryMeaning['functionName'] == 'count':
+        # Find the sum of all the values in a column
+        engine.findCount(queryMeaning['outputDB'], queryMeaning['input'])
+    elif queryMeaning['functionName'] == 'countgroup':
+        # Find the sum of all the values in a column after grouping
+        engine.findCountByGroup(queryMeaning['outputDB'], queryMeaning['input'], queryMeaning['fields'])
     elif queryMeaning['functionName'] == 'avggroup':
         # Find the average of all the values in a column after grouping
         engine.findAverageByGroup(queryMeaning['outputDB'], queryMeaning['input'], queryMeaning['fields'][0], queryMeaning['fields'][1:])

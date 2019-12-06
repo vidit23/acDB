@@ -467,7 +467,7 @@ def findSumByGroup(outputCollection, collectionName, column, groupBy):
         The collection name we use to take sum
     column : str
         The column name we want the sum of
-    groupBy : str
+    groupBy : [str]
         The column name we want to group by
     """
     collection = allCollections[collectionName]
@@ -477,6 +477,45 @@ def findSumByGroup(outputCollection, collectionName, column, groupBy):
     groupBySums = np.array( [ np.sum(collection[collection[groupBy] == row][column]) for row in uniqueCombinations] )
     # Append the unique values and their sum in one table
     groupedCollection = rfn.append_fields(uniqueCombinations, 'sum(' + column + ')', groupBySums, usemask=False)
+    allCollections[outputCollection] = groupedCollection
+    printTable(allCollections[outputCollection])
+
+
+def findCount(outputCollection, collectionName):
+    """Find the number of rows in a table
+    
+    Parameters
+    ----------
+    outputCollection : str
+        The collection name we store the final result as
+    collectionName : str
+        The collection name we need to count
+    """
+    col = allCollections[collectionName]
+    colSum = len(col)
+    allCollections[outputCollection] = np.array([(colSum)], dtype=[('count(*)', col.dtype)])
+    printTable(allCollections[outputCollection])
+
+
+def findCountByGroup(outputCollection, collectionName, groupBy):
+    """Group using a column and find the number of rows in the group
+    
+    Parameters
+    ----------
+    outputCollection : str
+        The collection name we store the final result as
+    collectionName : str
+        The collection name we use to take sum
+    groupBy : [str]
+        The column name we want to group by
+    """
+    collection = allCollections[collectionName]
+    # Find all the values we can group by
+    uniqueCombinations = np.unique(collection[groupBy])
+    # Go through the whole collection, find all row in a group and take count
+    groupBySums = np.array( [ len(collection[collection[groupBy] == row]) for row in uniqueCombinations] )
+    # Append the unique values and their count in one table
+    groupedCollection = rfn.append_fields(uniqueCombinations, 'count(*)', groupBySums, usemask=False)
     allCollections[outputCollection] = groupedCollection
     printTable(allCollections[outputCollection])
 
@@ -492,7 +531,7 @@ def findAverageByGroup(outputCollection, collectionName, column, groupBy):
         The collection name we use to take average
     column : str
         The column name we want the average of
-    groupBy : str
+    groupBy : [str]
         The column name we want to group by
     """
     collection = allCollections[collectionName]
