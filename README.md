@@ -11,7 +11,7 @@ R5 := sumgroup(R1, qty, time, pricerange)    | select sum(qty), time, pricerange
 R6 := avggroup(R1, qty, pricerange)          | select avg(qty), pricerange from R1 group by by pricerange
 S := inputfromfile(sales2)                   | suppose column headers are saleid, I, C, S, T, Q, P
 T := join(R, S, R.customerid = S.C)          | select * from R, S where R.customerid = S.C
-T1 := join(R1, S, R1.qty > S.Q)              | select * from R1, S where R1.qty > S.Q
+T1 :=  join(R1, S, (R1.qty > S.Q) and (R1.saleid = S.saleid)) | select * from R1, S where R1.qty > S.Q
 T2 := sort(T1, S_C)                          | sort T1 by S_C
 T2prime := sort(T1, R1_time, S_C)            | sort T1 by R_itemid, S_C (in that order)
 T3 := movavg(T2prime, R1_qty, 3)             | perform the three item moving average of T2prime on column R_qty. This will be as long as R_qty with the three way moving average of 4 8 9 7 being 4 6 7 8
@@ -24,3 +24,4 @@ Hash(R,itemid)                               | make hash on some field
 Q4 := select(R, itemid = 7)                  | this should use the hash index
 Q5 := concat(Q4, Q2)                         | concatenate the two tables (must have the same schema). Duplicate rows may result (though not with this example).
 outputtofile(Q5, Q5)                         | This should output the table Q5 into a file
+outputtofile(T, T)                         | This should output the table T into a file
