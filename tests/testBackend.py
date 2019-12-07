@@ -114,8 +114,8 @@ def runningFullTest():
     print('\n\n\n\n\nT := join(R, S, R.customerid = S.C)')
     runDBCommand('T := join(R, S, R.customerid = S.C)')
 
-    print('\n\n\n\n\nT1 := join(R1, S, (R1.qty > S.Q) and (R1.customerid = S.C))')
-    runDBCommand('T1 := join(R1, S, (R1.qty > S.Q) and (R1.customerid = S.C))')
+    print('\n\n\n\n\nT1 := join(R1, S, (R1.qty > S.Q) and (R1.saleid = S.saleid))')
+    runDBCommand('T1 := join(R1, S, (R1.qty > S.Q) and (R1.saleid = S.saleid))')
 
     print('\n\n\n\n\nT2 := sort(T1, S_C)')
     runDBCommand('T2 := sort(T1, S_C)')

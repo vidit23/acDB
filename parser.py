@@ -36,7 +36,7 @@ Inequalities: =, <, >, !=, >=, <=
 def parser(inputQuery):
     answer = {"outputDB": None,"functionName": None,"input":None,"fields": None,"condition": None}
     arr = []
-    Comparison_operator = ['!=','<','>','=','>=','<=']
+    Comparison_operator = ['!=','<=','>=','=','>','<']
     Logical_operator = ['and','or']
     inputQuery = inputQuery.strip()
     position_bracket1 = None
@@ -84,12 +84,22 @@ def parser(inputQuery):
                     brac1_comma1 = brac1_comma1.strip()
                     # print (brac1_comma1)
                     answer["input"] = brac1_comma1
+                    or_count = 0
+                    and_count = 0
                     #number of "or" in the query is been stored in the variable or_count
-                    or_count = inputQuery[position_comma + 1:-1].count('or')
-                    # print (or_count)
+                    o = [' or ', ')or(', ') or(', ')or (',')or','or(']
+                    for j in [i in inputQuery[position_comma + 1:-1] for i in o]:
+                        if j:
+                            or_count = inputQuery[position_comma + 1:-1].count('or')
+                            # print (or_count)
+                            break
                     #number of "and" in the query is been stored in the variable and_count
-                    and_count = inputQuery[position_comma + 1:-1].count('and')
-                    # print (and_count)
+                    o = [' and ', ')and(', ') and(', ')and (',')and','and(']
+                    for j in [i in inputQuery[position_comma + 1:-1] for i in o]:
+                        if j:
+                            and_count = inputQuery[position_comma + 1:-1].count('and')
+                            # print (and_count)
+                            break
                     #if there is an "and" or "or" in the query then code continues otherwise else is executed
                     if or_count != 0 or and_count != 0:
                         flag = False
@@ -128,13 +138,66 @@ def parser(inputQuery):
                                     arr.append(z1)
                     #if there are no "and" and "or" in the query then else is executed
                     else:
-                        comma1_bracketEnd = inputQuery[position_comma + 1:position_braketEnd]
-                        comma1_bracketEnd = comma1_bracketEnd.strip()
-                        arr = []
-                        arr.append(comma1_bracketEnd)
-                        # print (comma1_bracketEnd)
+                        i = 0
+                        b = inputQuery.find(",")
+                        c = inputQuery[position_bracket1 + 1:b].strip()
+                        # print(c)
+                        answer["input"] = c
+                        position_bracket1 = b
+                        i = b + 1
+                        if b != (-1):
+                            while i < len(inputQuery):
+                                b = inputQuery.find(",",i)
+                                c = inputQuery[position_bracket1 + 1:b].strip()
+                                # print (c)
+                                position = c.find("(") 
+                                # print (position)
+                                if position != -1:
+                                    flag = False
+                                    check_comparison = ''
+                                    for check_comparison in Comparison_operator:
+                                        if check_comparison in c:
+                                            flag = True
+                                            break
+                                    if flag:
+                                        new_var = (c[1:-1].strip()).split(check_comparison)
+                                        # print (new_var)
+                                        arr.append([new_var[0].strip(), check_comparison, new_var[1].strip()])
+                                        break
+                                    else:
+                                        arr.append(c.strip())
+                                    position_bracket1 = b
+                                    i = b + 1
+                                    if b == (-1):
+                                        break
+                                else:
+                                    flag = False
+                                    check_comparison = ''
+                                    for check_comparison in Comparison_operator:
+                                        if check_comparison in c:
+                                            flag = True
+                                            break
+                                    if flag:
+                                        new_var = (inputQuery[position_bracket1 + 1:b].strip()).split(check_comparison)
+                                        # print (new_var)
+                                        arr.append([new_var[0].strip(), check_comparison, new_var[1].strip()])
+                                        break
+                                    else:
+                                        arr.append(inputQuery[position_bracket1 + 1:b].strip())
+                                    position_bracket1 = b
+                                    i = b + 1
+                                    if b == (-1):
+                                        break
                     # print (arr)
                     answer["fields"] = arr
+                    # else:
+                    #     comma1_bracketEnd = inputQuery[position_comma + 1:position_braketEnd]
+                    #     comma1_bracketEnd = comma1_bracketEnd.strip()
+                    #     arr = []
+                    #     arr.append(comma1_bracketEnd)
+                    #     print (comma1_bracketEnd)
+                    # print (arr)
+                    # answer["fields"] = arr
                 #if there are no comma's present in the query 
                 elif position_comma == -1 and position_bracket1 != -1:
                     if_only_1_input = inputQuery[position_bracket1 + 1:position_braketEnd]
@@ -147,17 +210,19 @@ def parser(inputQuery):
         #if there are more than 1 comma present in the input query
         else:
             # print ("there are " + str(comma_count) +" comma's present in the string")
-            #if the query is in perfect format i.e. present with a starting and end bracket
-            #the value before the bracket i.e. function name is stored in a variable and the variable is stored in Dictionary 
             if position_bracket1 != -1 and position_braketEnd != -1:
+                # output_db = inputQuery
+                # output_db = output_db.strip()
+                # print (output_db)
+                # answer["outputDB"] = output_db
                 function_Name = inputQuery[:position_bracket1]
-                function_Name = function_Name.strip()
-                # print (function_Name)
+                function_Name  = function_Name.strip()
+                # print(function_Name)
                 answer["functionName"] = function_Name
                 i = 0
                 b = inputQuery.find(",")
                 c = inputQuery[position_bracket1 + 1:b].strip()
-                # print (c)
+                # print(c)
                 answer["input"] = c
                 position_bracket1 = b
                 i = b + 1
@@ -166,24 +231,123 @@ def parser(inputQuery):
                         b = inputQuery.find(",",i)
                         c = inputQuery[position_bracket1 + 1:b].strip()
                         # print (c)
-                        c = c.split()
-                        flag = False
-                        check_comparison = ''
-                        for check_comparison in Comparison_operator:
-                            if check_comparison in c:
-                                flag = True
+                        or_count = 0
+                        and_count = 0
+                        o = [' or ', ')or(', ') or(', ')or (',')or','or(']
+                        for j in [i in c for i in o]:
+                            if j:
+                                or_count = c.count('or')
+                                # print (or_count)
                                 break
-                        if flag:
-                            arr.append((inputQuery[position_bracket1 + 1:b].strip()).split())
-                            break
+                        o = [' and ', ')and(', ') and(', ')and (',')and','and(']
+                        for j in [i in c for i in o]:
+                            if j:
+                                and_count = c.count('and')
+                                # print (and_count)
+                                break
+                        if or_count != 0 or and_count != 0:
+                            flag = False
+                            check_logical = ''
+                            c = c.strip()
+                            # print (c)
+                            for check_logical in Logical_operator:
+                                if check_logical in c:
+                                    flag = True
+                                    break
+                            answer['condition'] = check_logical
+                            if flag:
+                                if or_count != -1 and and_count == 0:
+                                    c = c.split('or')
+                                    # print (c)
+                                    m = 0
+                                    while m <= or_count:
+                                        z1 = c[m].strip()
+                                        for check_comparison in Comparison_operator:
+                                            if check_comparison in z1:
+                                                flag = True
+                                                break
+                                        if flag:
+                                            z1 = z1[1:-1].split(check_comparison)
+                                            arr.append([z1[0].strip(), check_comparison, z1[1].strip()])   
+                                        m = m +1
+                                elif and_count != -1 and or_count == 0:
+                                    c = c.split('and') 
+                                    # print (c)
+                                    m = 0
+                                    flag = False
+                                    check_comparison = ''
+                                    while m <= and_count:
+                                        z1 = c[m].strip()
+                                        for check_comparison in Comparison_operator:
+                                            if check_comparison in z1:
+                                                flag = True
+                                                break
+                                        if flag:
+                                            z1 = z1[1:-1].split(check_comparison)
+                                            arr.append([z1[0].strip(), check_comparison, z1[1].strip()])   
+                                        m = m +1
+                            position_bracket1 = b
+                            i = b + 1
+                            if b == (-1):
+                                break
+                            answer["fields"] = arr
                         else:
-                            arr.append(inputQuery[position_bracket1 + 1:b].strip())
-                        position_bracket1 = b
-                        i = b + 1
-                        if b == (-1):
-                            break
-                        answer["fields"] = arr
+                            c = c.split()
+                            flag = False
+                            check_comparison = ''
+                            for check_comparison in Comparison_operator:
+                                if check_comparison in c:
+                                    flag = True
+                                    break
+                            if flag:
+                                arr.append((inputQuery[position_bracket1 + 1:b].strip()).split())
+                                break
+                            else:
+                                arr.append(inputQuery[position_bracket1 + 1:b].strip())
+                            position_bracket1 = b
+                            i = b + 1
+                            if b == (-1):
+                                break
+                            answer["fields"] = arr
                 return answer
+            # print ("there are " + str(comma_count) +" comma's present in the string")
+            # #if the query is in perfect format i.e. present with a starting and end bracket
+            # #the value before the bracket i.e. function name is stored in a variable and the variable is stored in Dictionary 
+            # if position_bracket1 != -1 and position_braketEnd != -1:
+            #     function_Name = inputQuery[:position_bracket1]
+            #     function_Name = function_Name.strip()
+            #     print (function_Name)
+            #     answer["functionName"] = function_Name
+            #     i = 0
+            #     b = inputQuery.find(",")
+            #     c = inputQuery[position_bracket1 + 1:b].strip()
+            #     print (c)
+            #     answer["input"] = c
+            #     position_bracket1 = b
+            #     i = b + 1
+            #     if b != (-1):
+            #         while i < len(inputQuery):
+            #             b = inputQuery.find(",",i)
+            #             c = inputQuery[position_bracket1 + 1:b].strip()
+            #             print (c)
+            #             c = c.split()
+            #             flag = False
+            #             check_comparison = ''
+            #             for check_comparison in Comparison_operator:
+            #                 if check_comparison in c:
+            #                     flag = True
+            #                     break
+            #             if flag:
+            #                 arr.append((inputQuery[position_bracket1 + 1:b].strip()).split())
+            #                 break
+            #             else:
+            #                 arr.append(inputQuery[position_bracket1 + 1:b].strip())
+            #             position_bracket1 = b
+            #             i = b + 1
+            #             if b == (-1):
+            #                 break
+            #             answer["fields"] = arr
+            #     return answer
             else:
                 print("Syntax Error")
     #if the assignment operator is present then below part of the code executes 
@@ -237,14 +401,24 @@ def parser(inputQuery):
                 if position_comma != -1:
                     brac1_comma1 = inputQuery2[position_bracket1 + 1:position_comma]
                     brac1_comma1 = brac1_comma1.strip()
-                    # print ("brac1_comma1")
+                    # print (brac1_comma1)
                     answer["input"] = brac1_comma1
                     #number of "or" in the query is been stored in the variable or_count
-                    or_count = inputQuery[position_comma + 1:-1].count('or')
-                    # print (or_count)
+                    or_count = 0
+                    and_count = 0
+                    o = [' or ', ')or(', ') or(', ')or (',')or','or(']
+                    for j in [i in inputQuery2[position_comma + 1:-1] for i in o]:
+                        if j:
+                            or_count = inputQuery2[position_comma + 1:-1].count('or')
+                            # print (or_count)
+                            break
                     #number of "and" in the query is been stored in the variable and_count
-                    and_count = inputQuery[position_comma + 1:-1].count('and')
-                    # print (and_count)
+                    o = [' and ', ')and(', ') and(', ')and (',')and','and(']
+                    for j in [i in inputQuery2[position_comma + 1:-1] for i in o]:
+                        if j:
+                            and_count = inputQuery2[position_comma + 1:-1].count('and')
+                            # print (and_count)
+                            break
                     #if there is an "and" or "or" in the query then code continues otherwise else is executed
                     if or_count != 0 or and_count != 0:
                         flag = False
@@ -285,7 +459,9 @@ def parser(inputQuery):
                                             break
                                     if flag:
                                         z1 = z1[1:-1].split(check_comparison)
-                                        arr.append([z1[0].strip(), check_comparison, z1[1].strip()])   
+                                        arr.append([z1[0].strip(), check_comparison, z1[1].strip()]) 
+                                    else:
+                                        arr.append(z1)  
                                     m = m +1
                     else:
                         i = 0
@@ -371,10 +547,20 @@ def parser(inputQuery):
                         b = inputQuery2.find(",",i)
                         c = inputQuery2[position_bracket1 + 1:b].strip()
                         # print (c)
-                        or_count = c.count('or')
-                        # print (or_count)
-                        and_count = c.count('and')
-                        # print (and_count)
+                        or_count = 0
+                        and_count = 0
+                        o = [' or ', ')or(', ') or(', ')or (',')or','or(']
+                        for j in [i in c for i in o]:
+                            if j:
+                                or_count = c.count('or')
+                                # print (or_count)
+                                break
+                        o = [' and ', ')and(', ') and(', ')and (',')and','and(']
+                        for j in [i in c for i in o]:
+                            if j:
+                                and_count = c.count('and')
+                                # print (and_count)
+                                break
                         if or_count != 0 or and_count != 0:
                             flag = False
                             check_logical = ''

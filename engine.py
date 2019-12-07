@@ -65,7 +65,7 @@ def canEval(expression):
         return False
 
 
-def printTable(collection, limit = 20):
+def printTable(collection, limit = 5):
     """Prints the given collection in a readable format
 
     Parameters
