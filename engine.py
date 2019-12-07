@@ -7,13 +7,13 @@ import re
 from tabulate import tabulate
 
 import warnings
-warnings.filterwarnings("ignore", category = np.VisibleDeprecationWarning)
+warnings.filterwarnings('ignore', category = np.VisibleDeprecationWarning)
 
 # Contains all collections with keys as their name and numpy array as value
 allCollections = {}
-# Stores all the hashes generated in the form "collectionName.column: hashmap" 
+# Stores all the hashes generated in the form 'collectionName.column: hashmap' 
 hashedKeys = {}
-# Stores all the BTrees generated in the form "collectionName.column: BTree" 
+# Stores all the BTrees generated in the form 'collectionName.column: BTree' 
 bTreedKeys = {}
 
 
@@ -66,7 +66,7 @@ def printTable(collection, limit = 20):
     # Forms a table in a pretty manner
     table = tabulate(collection[: limit], headers, tablefmt = "grid")
     print(table)
-    print("Number of rows returned: " + str(len(collection)))
+    print('Number of rows returned: ' + str(len(collection)))
 
 
 def readFromFile(outputCollection, readFromFile):
@@ -84,9 +84,10 @@ def readFromFile(outputCollection, readFromFile):
     # Stores the read collection into a global variable that can be accessed anywhere in this file
     allCollections[outputCollection] = collection
     printTable(allCollections[outputCollection])
+    outputToFile(outputCollection, 'allOperations', 'a+')
 
 
-def outputToFile(collection, fileName):
+def outputToFile(collection, fileName, writeType):
     """Outputs a specified collection onto a file
     
     Parameters
@@ -102,7 +103,9 @@ def outputToFile(collection, fileName):
     for name in headers:
         prefix += ('|' + name)
     
-    with open('vvb238_dk3718_' + fileName, 'w') as filePointer:
+    with open('vvb238_dk3718_' + fileName, writeType) as filePointer:
+        if writeType == 'a+':
+            filePointer.write('\n\n\n')
         # Writing the headers into the file first
         filePointer.write(prefix[1:])
         # Going row by row to write into the file
@@ -116,6 +119,9 @@ def outputToFile(collection, fileName):
                 else:
                     rowInStr += ('|' + str(field))
             filePointer.write('\n' + rowInStr[1:])
+        if writeType == 'a+':
+            filePointer.write('\n\nNumber of rows in the table: ' + str(len(allCollections[collection])))
+        
 
 
 def project(outputCollection, collectionName, fields):
@@ -133,6 +139,7 @@ def project(outputCollection, collectionName, fields):
     """
     allCollections[outputCollection] = allCollections[collectionName][fields]
     printTable(allCollections[outputCollection])
+    outputToFile(outputCollection, 'allOperations', 'a+')
 
 
 def sortCollection(outputCollection, collectionName, column):
@@ -150,6 +157,7 @@ def sortCollection(outputCollection, collectionName, column):
     sortedCollection = np.sort(allCollections[collectionName], order=column)
     allCollections[outputCollection] = sortedCollection
     printTable(allCollections[outputCollection])
+    outputToFile(outputCollection, 'allOperations', 'a+')
 
 
 def concatenateCollection(outputCollection, collection1, collection2):
@@ -168,6 +176,7 @@ def concatenateCollection(outputCollection, collection1, collection2):
         concatenatedCollection = np.concatenate((allCollections[collection1], allCollections[collection2]), axis = 0)
         allCollections[outputCollection] = concatenatedCollection
         printTable(allCollections[outputCollection])
+        outputToFile(outputCollection, 'allOperations', 'a+')
     except:
         print('The column names do not match or they are not in the same order. Try project first')
 
@@ -400,6 +409,7 @@ def select(outputCollection, collectionName, conditions, operator):
     else:
         allCollections[outputCollection] = finalOutcome
         printTable(allCollections[outputCollection])
+        outputToFile(outputCollection, 'allOperations', 'a+')
 
 
 def findAverage(outputCollection, collectionName, column):
@@ -418,6 +428,7 @@ def findAverage(outputCollection, collectionName, column):
     mean = np.mean(col)
     allCollections[outputCollection] = np.array([(mean)], dtype=[('mean(' + column + ')', 'float_')])
     printTable(allCollections[outputCollection])
+    outputToFile(outputCollection, 'allOperations', 'a+')
 
 
 def findMax(outputCollection, collectionName, column):
@@ -436,6 +447,7 @@ def findMax(outputCollection, collectionName, column):
     colMax = np.max(col)
     allCollections[outputCollection] = np.array([(colMax)], dtype=[('max(' + column + ')', col.dtype)])
     printTable(allCollections[outputCollection])
+    outputToFile(outputCollection, 'allOperations', 'a+')
 
 
 def findSum(outputCollection, collectionName, column):
@@ -454,6 +466,7 @@ def findSum(outputCollection, collectionName, column):
     colSum = np.sum(col)
     allCollections[outputCollection] = np.array([(colSum)], dtype=[('sum(' + column + ')', col.dtype)])
     printTable(allCollections[outputCollection])
+    outputToFile(outputCollection, 'allOperations', 'a+')
 
 
 def findSumByGroup(outputCollection, collectionName, column, groupBy):
@@ -479,6 +492,7 @@ def findSumByGroup(outputCollection, collectionName, column, groupBy):
     groupedCollection = rfn.append_fields(uniqueCombinations, 'sum(' + column + ')', groupBySums, usemask=False)
     allCollections[outputCollection] = groupedCollection
     printTable(allCollections[outputCollection])
+    outputToFile(outputCollection, 'allOperations', 'a+')
 
 
 def findCount(outputCollection, collectionName):
@@ -495,6 +509,7 @@ def findCount(outputCollection, collectionName):
     colSum = len(col)
     allCollections[outputCollection] = np.array([(colSum)], dtype=[('count(*)', col.dtype)])
     printTable(allCollections[outputCollection])
+    outputToFile(outputCollection, 'allOperations', 'a+')
 
 
 def findCountByGroup(outputCollection, collectionName, groupBy):
@@ -518,6 +533,7 @@ def findCountByGroup(outputCollection, collectionName, groupBy):
     groupedCollection = rfn.append_fields(uniqueCombinations, 'count(*)', groupBySums, usemask=False)
     allCollections[outputCollection] = groupedCollection
     printTable(allCollections[outputCollection])
+    outputToFile(outputCollection, 'allOperations', 'a+')
 
 
 def findAverageByGroup(outputCollection, collectionName, column, groupBy):
@@ -543,6 +559,7 @@ def findAverageByGroup(outputCollection, collectionName, column, groupBy):
     groupedCollection = rfn.append_fields(uniqueCombinations, 'avg(' + column + ')', groupByAvgs, usemask=False)
     allCollections[outputCollection] = groupedCollection
     printTable(allCollections[outputCollection])
+    outputToFile(outputCollection, 'allOperations', 'a+')
 
 
 def findMovingSum(outputCollection, collectionName, column, windowSize):
@@ -573,6 +590,7 @@ def findMovingSum(outputCollection, collectionName, column, windowSize):
     movSumTable = np.array(movingSum, dtype=[('movsum(' + column + ')', wholeColumn.dtype)])
     allCollections[outputCollection] = rfn.merge_arrays((allCollections[collectionName], movSumTable), flatten = True, usemask = False)
     printTable(allCollections[outputCollection])
+    outputToFile(outputCollection, 'allOperations', 'a+')
 
 
 def findMovingAverage(outputCollection, collectionName, column, windowSize):
@@ -604,6 +622,7 @@ def findMovingAverage(outputCollection, collectionName, column, windowSize):
     movAvgTable = np.array(movingAverage, dtype=[('movavg(' + column + ')', 'float_')])
     allCollections[outputCollection] = rfn.merge_arrays((allCollections[collectionName], movAvgTable), flatten = True, usemask = False)
     printTable(allCollections[outputCollection])
+    outputToFile(outputCollection, 'allOperations', 'a+')
 
 
 def join(outputCollection, leftCollection, rightCollection, conditions, operator):
@@ -687,3 +706,4 @@ def join(outputCollection, leftCollection, rightCollection, conditions, operator
 
     allCollections[outputCollection] = joinedCollection
     printTable(allCollections[outputCollection])
+    outputToFile(outputCollection, 'allOperations', 'a+')

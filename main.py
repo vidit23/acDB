@@ -11,7 +11,7 @@ def functionalityChooser(queryMeaning):
         engine.readFromFile(queryMeaning['outputDB'], queryMeaning['input'])
     elif queryMeaning['functionName'] == 'outputtofile':
         # Output to a file
-        engine.outputToFile(queryMeaning['input'], queryMeaning['fields'][0])
+        engine.outputToFile(queryMeaning['input'], queryMeaning['fields'][0], 'w+')
     elif queryMeaning['functionName'] == 'project':
         # Select a particular set of columns from a collection
         engine.project(queryMeaning['outputDB'], queryMeaning['input'], queryMeaning['fields'])
@@ -65,17 +65,27 @@ def functionalityChooser(queryMeaning):
 
 
 def runDBCommand(command):
-    queryMeaning = parser(command)
-    print('\n\nExtracted meaning: ', queryMeaning)
+    try:
+        queryMeaning = parser(command)
+        print('\n\nExtracted meaning: ', queryMeaning)
+    except Exception as err:
+        print('There was an error in parsing the query')
+        print(err)
+        return
     try:
         startTime = time.time()
         functionalityChooser(queryMeaning)
-        print("It took " + str(time.time() - startTime) + " seconds to execute this query")
+        with open('vvb238_dk3718_allOperations', 'a+') as filePointer:
+            filePointer.write('\n\nIt took ' + str(time.time() - startTime) + ' seconds for the query to execute')
+        print('It took ' + str(time.time() - startTime) + ' seconds to execute this query')
     except Exception as err:
-        print("There was an error in processing the query")
+        print('There was an error in processing the query')
         print(err)
+        return
 
 
+# Empties the allOperation file everytime the program runs
+open('vvb238_dk3718_allOperations', 'w+').close()
 while 1:
     query = input('Enter your query: ')
     if query == 'quit':
