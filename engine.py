@@ -51,7 +51,7 @@ def canEval(expression):
         return False
 
 
-def printTable(collection, limit = 10):
+def printTable(collection, limit = 20):
     """Prints the given collection in a readable format
 
     Parameters
@@ -102,7 +102,7 @@ def outputToFile(collection, fileName):
     for name in headers:
         prefix += ('|' + name)
     
-    with open(fileName, 'w') as filePointer:
+    with open('vvb238_dk3718_' + fileName, 'w') as filePointer:
         # Writing the headers into the file first
         filePointer.write(prefix[1:])
         # Going row by row to write into the file
@@ -169,7 +169,7 @@ def concatenateCollection(outputCollection, collection1, collection2):
         allCollections[outputCollection] = concatenatedCollection
         printTable(allCollections[outputCollection])
     except:
-        print('The columns do not match')
+        print('The column names do not match or they are not in the same order. Try project first')
 
 
 def createHash(collectionName, column):
@@ -569,7 +569,9 @@ def findMovingSum(outputCollection, collectionName, column, windowSize):
             sumTillHere -= wholeColumn[rowNum - windowSize]
             sumTillHere += wholeColumn[rowNum]
         movingSum.append(sumTillHere)
-    allCollections[outputCollection] = np.array(movingSum, dtype=[('movsum(' + column + ')', wholeColumn.dtype)])
+
+    movSumTable = np.array(movingSum, dtype=[('movsum(' + column + ')', wholeColumn.dtype)])
+    allCollections[outputCollection] = rfn.merge_arrays((allCollections[collectionName], movSumTable), flatten = True, usemask = False)
     printTable(allCollections[outputCollection])
 
 
@@ -598,7 +600,9 @@ def findMovingAverage(outputCollection, collectionName, column, windowSize):
             sumTillHere -= wholeColumn[rowNum - windowSize]
             sumTillHere += wholeColumn[rowNum]
             movingAverage.append(sumTillHere / windowSize)
-    allCollections[outputCollection] = np.array(movingAverage, dtype=[('movavg(' + column + ')', 'float_')])
+
+    movAvgTable = np.array(movingAverage, dtype=[('movavg(' + column + ')', 'float_')])
+    allCollections[outputCollection] = rfn.merge_arrays((allCollections[collectionName], movAvgTable), flatten = True, usemask = False)
     printTable(allCollections[outputCollection])
 
 

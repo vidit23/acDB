@@ -64,15 +64,9 @@ def functionalityChooser(queryMeaning):
         print('The command ' + queryMeaning['functionName'] + ' is not recognized')
 
 
-while 1:
-    query = input('Enter your query: ')
-    if query == 'quit':
-        break
-    elif query == 'test':
-        test.runningBackendTests()
-        continue
-    queryMeaning = parser(query)
-    print('\n\n\n\nExtracted meaning: ', queryMeaning)
+def runDBCommand(command):
+    queryMeaning = parser(command)
+    print('\n\nExtracted meaning: ', queryMeaning)
     try:
         startTime = time.time()
         functionalityChooser(queryMeaning)
@@ -80,3 +74,15 @@ while 1:
     except Exception as err:
         print("There was an error in processing the query")
         print(err)
+
+
+while 1:
+    query = input('Enter your query: ')
+    if query == 'quit':
+        break
+    elif query == 'alltest':
+        test.runningFullTest()
+    elif query == 'backtest':
+        test.runningBackendTests()
+    else:
+        runDBCommand(query)

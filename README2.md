@@ -30,3 +30,9 @@
 16. Hash
 17. Btree
 18. join
+
+Supports more than 2 conditions
+
+Variable storage
+
+Make sure if the file has a .txt after that is mentioned in the paramter of inputfromfile

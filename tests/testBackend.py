@@ -1,7 +1,22 @@
 import sys, os
+import time
+
 sys.path.append(os.path.abspath(os.path.join('..')))
 
 import engine
+from parser import parser
+
+
+def runDBCommand(command):
+    queryMeaning = parser(command)
+    print('\n\nExtracted meaning: ', queryMeaning)
+    try:
+        startTime = time.time()
+        functionalityChooser(queryMeaning)
+        print("It took " + str(time.time() - startTime) + " seconds to execute this query")
+    except Exception as err:
+        print("There was an error in processing the query")
+        print(err)
 
 
 def functionalityChooser(queryMeaning):
@@ -35,6 +50,12 @@ def functionalityChooser(queryMeaning):
     elif queryMeaning['functionName'] == 'sumgroup':
         # Find the sum of all the values in a column after grouping
         engine.findSumByGroup(queryMeaning['outputDB'], queryMeaning['input'], queryMeaning['fields'][0], queryMeaning['fields'][1:])
+    elif queryMeaning['functionName'] == 'count':
+        # Find the sum of all the values in a column
+        engine.findCount(queryMeaning['outputDB'], queryMeaning['input'])
+    elif queryMeaning['functionName'] == 'countgroup':
+        # Find the sum of all the values in a column after grouping
+        engine.findCountByGroup(queryMeaning['outputDB'], queryMeaning['input'], queryMeaning['fields'])
     elif queryMeaning['functionName'] == 'avggroup':
         # Find the average of all the values in a column after grouping
         engine.findAverageByGroup(queryMeaning['outputDB'], queryMeaning['input'], queryMeaning['fields'][0], queryMeaning['fields'][1:])
@@ -55,6 +76,80 @@ def functionalityChooser(queryMeaning):
         engine.join(queryMeaning['outputDB'], queryMeaning['input'], queryMeaning['fields'][0], queryMeaning['fields'][1:], queryMeaning['condition'])
     else:
         print('The command ' + queryMeaning['functionName'] + ' is not recognized')
+
+
+def runningFullTest():
+    print('\n\n\n\n\nR := inputfromfile(sales1)')
+    runDBCommand('R := inputfromfile(sales1)')
+
+    print('\n\n\n\n\nR1 := select(R, (time > 50) or (qty < 30))')
+    runDBCommand('R1 := select(R, (time > 50) or (qty < 30))')
+
+    print('\n\n\n\n\nR2 := project(R1, saleid, qty, pricerange)')
+    runDBCommand('R2 := project(R1, saleid, qty, pricerange)')
+
+    print('\n\n\n\n\nR3 := avg(R1, qty)')
+    runDBCommand('R3 := avg(R1, qty)')
+
+    print('\n\n\n\n\nR4 := sumgroup(R1, time, qty)')
+    runDBCommand('R4 := sumgroup(R1, time, qty)')
+
+    print('\n\n\n\n\nR5 := sumgroup(R1, qty, time, pricerange)')
+    runDBCommand('R5 := sumgroup(R1, qty, time, pricerange)')
+
+    print('\n\n\n\n\nR6 := avggroup(R1, qty, pricerange)')
+    runDBCommand('R6 := avggroup(R1, qty, pricerange)')
+
+    print('\n\n\n\n\nS := inputfromfile(sales2)')
+    runDBCommand('S := inputfromfile(sales2)')
+
+    print('\n\n\n\n\nT := join(R, S, R.customerid = S.C)')
+    runDBCommand('T := join(R, S, R.customerid = S.C)')
+
+    print('\n\n\n\n\nT1 := join(R1, S, (R1.qty > S.Q) and (R1.customerid = S.C))')
+    runDBCommand('T1 := join(R1, S, (R1.qty > S.Q) and (R1.customerid = S.C))')
+
+    print('\n\n\n\n\nT2 := sort(T1, S_C)')
+    runDBCommand('T2 := sort(T1, S_C)')
+
+    print('\n\n\n\n\nT2prime := sort(T1, R1_time, S_C)')
+    runDBCommand('T2prime := sort(T1, R1_time, S_C)')
+
+    print('\n\n\n\n\nT3 := movavg(T2prime, R1_qty, 3)')
+    runDBCommand('T3 := movavg(T2prime, R1_qty, 3)')
+
+    print('\n\n\n\n\nT4 := movsum(T2prime, R1_qty, 5)')
+    runDBCommand('T4 := movsum(T2prime, R1_qty, 5)')
+
+    print('\n\n\n\n\nQ1 := select(R, qty = 5)')
+    runDBCommand('Q1 := select(R, qty = 5)')
+
+    print('\n\n\n\n\nBtree(R, qty)')
+    runDBCommand('Btree(R, qty)')
+
+    print('\n\n\n\n\nQ2 := select(R, qty = 5)')
+    runDBCommand('Q2 := select(R, qty = 5)')
+
+    print('\n\n\n\n\nHash(R,itemid)')
+    runDBCommand('Hash(R,itemid)')
+
+    print('\n\n\n\n\nQ4 := select(R, itemid = 7)')
+    runDBCommand('Q4 := select(R, itemid = 7)')
+
+    print('\n\n\n\n\nQ5 := concat(Q4, Q2)')
+    runDBCommand('Q5 := concat(Q4, Q2)')
+
+    print('\n\n\n\n\noutputtofile(Q5, Q5)')
+    runDBCommand('outputtofile(Q5, Q5)')
+
+    # print('\n\n\n\n\n')
+    # runDBCommand('')
+
+    # print('\n\n\n\n\n')
+    # runDBCommand('')
+
+    # print('\n\n\n\n\n')
+    # runDBCommand('')
 
 
 def runningBackendTests():
