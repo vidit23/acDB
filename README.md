@@ -25,8 +25,8 @@
     - `R2 := sort(collectionName, column1, column2)`
 5. **concat** - Concatenates two collections, make sure the column names are the same and in the same order for both collection.
     - `R3 := concat(collectionName_1, collectionName_2)`
-6. **select** - Filter rows based on given queries. Can handle more than two condition but only when combined using either 'or' or 'and'.
-    - `R4 := select(collectionName, (column1 > column2 + 50) or (column3 != 30/2))`
+6. **select** - Filter rows based on given queries. Can handle more than two condition but only when combined using either 'or' or 'and'. While comparing text, do not give quotations.
+    - `R4 := select(collectionName, (column1 > column2 + 50) or (column3 != 30/2) or (column4 == text))`
 7. **avg** - Returns a table containing the average of a column in a collection
     - `R5 := avg(collectionName, column)`
 8. **max** - Returns a table containing the maximum of a column in a collection
