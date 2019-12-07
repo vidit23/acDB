@@ -1,27 +1,55 @@
-We will run your programs on test cases of our choosing. For ease of parsing there will be one operation per line. 
+## This project tries to emulate how a SQL Database works using Python3. 
+#### To run the project:
+1. Assuming you have pip installed, run the command `pip3 install -r requirements.txt`
+2. And then, `python3 main.py`
+    - Type `quit` to exit the program
+    - Type `alltest` to run all the queries given in the sample file
+    - Type queries according to the command list given below.
+    - Does not accept commands from a file
+    
+#### File structure
+1. engine.py - contains the implementation of all the functions
+2. parser.py - parsers the query and returns a dictionary of the extracted meaning
+3. main.py - Accepts the input from user, calls the parser and accordingly calls the required function
+4. tests/ - contains a bunch of test cases written to chec correctness
 
-Input | Meaning
--------------------------------------------  | ----------------------------------------
-R := inputfromfile(sales1)                   | import vertical bar delimited foo, first line has column headers. Suppose they are saleid, itemid, customerid, storeid, time, qty, pricerange
-R1 := select(R, (time > 50) or (qty < 30))   | select * from R where time > 50 or qty < 30
-R2 := project(R1, saleid, qty, pricerange)   | select saleid, qty, pricerange from R1
-R3 := avg(R1, qty)                           | select avg(qty) from R1
-R4 := sumgroup(R1, time, qty)                | select qty, sum(time) from R1 group by qty
-R5 := sumgroup(R1, qty, time, pricerange)    | select sum(qty), time, pricerange from R1 group by time, pricerange
-R6 := avggroup(R1, qty, pricerange)          | select avg(qty), pricerange from R1 group by by pricerange
-S := inputfromfile(sales2)                   | suppose column headers are saleid, I, C, S, T, Q, P
-T := join(R, S, R.customerid = S.C)          | select * from R, S where R.customerid = S.C
-T1 :=  join(R1, S, (R1.qty > S.Q) and (R1.saleid = S.saleid)) | select * from R1, S where R1.qty > S.Q
-T2 := sort(T1, S_C)                          | sort T1 by S_C
-T2prime := sort(T1, R1_time, S_C)            | sort T1 by R_itemid, S_C (in that order)
-T3 := movavg(T2prime, R1_qty, 3)             | perform the three item moving average of T2prime on column R_qty. This will be as long as R_qty with the three way moving average of 4 8 9 7 being 4 6 7 8
-T4 := movsum(T2prime, R1_qty, 5)             | perform the five item moving sum of T2prime on column R_qty
-Q1 := select(R, qty = 5)                     | select * from R where qty=5 
-Btree(R, qty)                                | create an index on R based on column qty. Equality selections and joins on R should use the index.
-Q2 := select(R, qty = 5)                     | this should use the index
-Q3 := select(R, itemid = 7)                  | select * from R where itemid = 7
-Hash(R,itemid)                               | make hash on some field
-Q4 := select(R, itemid = 7)                  | this should use the hash index
-Q5 := concat(Q4, Q2)                         | concatenate the two tables (must have the same schema). Duplicate rows may result (though not with this example).
-outputtofile(Q5, Q5)                         | This should output the table Q5 into a file
-outputtofile(T, T)                         | This should output the table T into a file
+#### The commands that are accepted by the system and the corresponding query format:
+1. inputfromfile - reads a collection from the given file name. Please make sure to add file suffix such as .txt in the parameter if the file has it.
+    - `R := inputfromfile(fileName)`
+2. outputtofile  - outputs a given collection to a file
+    - `outputtofile(collectionName, fileName)`
+3. project - Selects the listed columns from the table in the particular order.
+    - `R1 := project(collectionName, column1, column2, column3)`
+4. sort - Sorts the collection according to given column names. Can take multiple columns
+    - `R2 := sort(collectionName, column1, column2)`
+5. concat - Concatenates two collections, make sure the column names are the same and in the same order for both collection.
+    - `R3 := concat(collectionName_1, collectionName_2)`
+6. select - Filter rows based on given queries. Can handle more than two condition but only when combined using either 'or' or 'and'.
+    - `R4 := select(collectionName, (column1 > column2 + 50) or (column3 != 30/2))`
+7. avg - Returns a table containing the average of a column in a collection
+    - `R5 := avg(collectionName, column)`
+8. max - Returns a table containing the maximum of a column in a collection
+    - `R6 := max(collectionName, column)`
+9. sum - Returns a table containing the sum of a column in a collection
+    - `R7 := sum(collectionName, column)`
+10. count - Returns a table containing the number of rows in a collection
+    - `count(collectionName)`
+11. countgroup - Groups the collection using columns and counts how many rows in each group
+    - `R8 := countgroup(collectionName, groupBy_1, groupBy_2)`
+12. sumgroup - Groups the collection using columns and sums rows in each group
+    - `R9 := sumgroup(collectionName, sum_column, groupBy_column1, groupBy_column2)`
+13. avggroup - Groups the collection using columns and averages rows in each group
+    - `R10 := avggroup(collectionName, avg_column, groupBy_column1, groupBy_column2, groupBy_column3)`
+14. movsum - Calculates moving sum based on window size
+    - `R11 := movsum(collectionName, sum_column, windowSize)`
+15. movavg - Calculates moving average based on window size
+    - `R12 := movavg(collectionName, sum_column, windowSize)`
+16. Hash - Indexes a column using hash
+    - `Hash(collectionName, columnName)`
+17. Btree - Indexes a column using BTree
+    - `Btree(collectionName, columnName)`
+18. join - Inner joins two collections using given condition. Can handle more than two condition but only when combined using either 'or' or 'and'.
+    - `R115 := join(collection1, collection2, (collection1.col1 >= collection2.col2 + 50) and (collection2.col3 - 4 = collection1.col5))`
+
+
+Make sure if the file has a .txt after that is mentioned in the paramter of inputfromfile
