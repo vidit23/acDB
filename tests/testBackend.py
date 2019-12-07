@@ -19,7 +19,7 @@ def runDBCommand(command):
         startTime = time.time()
         functionalityChooser(queryMeaning)
         with open('vvb238_dk3718_allOperations', 'a+') as filePointer:
-            filePointer.write('\n\nIt took ' + str(time.time() - startTime) + ' seconds for the query to execute')
+            filePointer.write('\nIt took ' + str(time.time() - startTime) + ' seconds for the query to execute')
         print('It took ' + str(time.time() - startTime) + ' seconds to execute this query')
     except Exception as err:
         print('There was an error in processing the query')
@@ -87,8 +87,8 @@ def functionalityChooser(queryMeaning):
 
 
 def runningFullTest():
-    print('\n\n\n\n\nR := inputfromfile(sales1)')
-    runDBCommand('R := inputfromfile(sales1)')
+    print('\n\n\n\n\nR := inputfromfile(./data/sales1)')
+    runDBCommand('R := inputfromfile(./data/sales1)')
 
     print('\n\n\n\n\nR1 := select(R, (time > 50) or (qty < 30))')
     runDBCommand('R1 := select(R, (time > 50) or (qty < 30))')
@@ -108,8 +108,8 @@ def runningFullTest():
     print('\n\n\n\n\nR6 := avggroup(R1, qty, pricerange)')
     runDBCommand('R6 := avggroup(R1, qty, pricerange)')
 
-    print('\n\n\n\n\nS := inputfromfile(sales2)')
-    runDBCommand('S := inputfromfile(sales2)')
+    print('\n\n\n\n\nS := inputfromfile(./data/sales2)')
+    runDBCommand('S := inputfromfile(./data/sales2)')
 
     print('\n\n\n\n\nT := join(R, S, R.customerid = S.C)')
     runDBCommand('T := join(R, S, R.customerid = S.C)')
@@ -164,7 +164,7 @@ def runningBackendTests():
     print('\n\n\n\n\nR := inputfromfile(sales1)')
     functionalityChooser({'outputDB': 'R', 
                         'functionName': 'inputfromfile', 
-                        'input':'sales1',
+                        'input':'./data/sales1',
                         'fields': None,
                         'condition': None })
 
@@ -213,7 +213,7 @@ def runningBackendTests():
     print('\n\n\n\n\nS := inputfromfile(sales2)')
     functionalityChooser({'outputDB': 'S', 
                         'functionName': 'inputfromfile', 
-                        'input':'sales2',
+                        'input':'./data/sales2',
                         'fields': None,
                         'condition': None })
     

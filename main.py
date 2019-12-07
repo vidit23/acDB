@@ -76,7 +76,7 @@ def runDBCommand(command):
         startTime = time.time()
         functionalityChooser(queryMeaning)
         with open('vvb238_dk3718_allOperations', 'a+') as filePointer:
-            filePointer.write('\n\nIt took ' + str(time.time() - startTime) + ' seconds for the query to execute')
+            filePointer.write('\nIt took ' + str(time.time() - startTime) + ' seconds for the query to execute')
         print('It took ' + str(time.time() - startTime) + ' seconds to execute this query')
     except Exception as err:
         print('There was an error in processing the query')
