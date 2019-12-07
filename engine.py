@@ -11,9 +11,9 @@ warnings.filterwarnings('ignore', category = np.VisibleDeprecationWarning)
 
 # Contains all collections with keys as their name and numpy array as value
 allCollections = {}
-# Stores all the hashes generated in the form 'collectionName.column: hashmap' 
+# Stores all the hashes generated in the form 'collectionName_column: hashmap' 
 hashedKeys = {}
-# Stores all the BTrees generated in the form 'collectionName.column: BTree' 
+# Stores all the BTrees generated in the form 'collectionName_column: BTree' 
 bTreedKeys = {}
 
 
@@ -34,6 +34,20 @@ def findDataType(param):
         except ValueError:
             num = str.encode(param)
     return num
+
+
+def checkIfIndexed(column):
+    """Checks if the collectionName.column exists in either hashedKeys or bTreedKeys
+
+    Parameters
+    ----------
+    column : str
+        The key to check in the dictionary
+    """
+    if column in hashedKeys or column in bTreedKeys:
+        return True
+    else:
+        return False
 
 
 def canEval(expression):
@@ -198,7 +212,7 @@ def createHash(collectionName, column):
         # Hash stores the columns value and the index it is present in
         hashmap[collection[row][column]].append(row)
     # We store the hash in a global variable with key collectionName.column
-    hashedKeys[collectionName + '.' + column] = hashmap
+    hashedKeys[collectionName + '_' + column] = hashmap
     print('Created a hashmap on ' + column + ' for collection ' + collectionName)
 
 
@@ -215,7 +229,7 @@ def hashMatch(collection, column, value):
         Value we have to check for
     """
     # Fetching the hash from global variable
-    hashmap = hashedKeys[collection + '.' + column]
+    hashmap = hashedKeys[collection + '_' + column]
     # Finding all the rows that match the value
     matchingRows = hashmap[value]
     # Making an array with False values that is equal to the size of the collection
@@ -245,7 +259,7 @@ def createBTree(collectionName, column):
     tree = OOBTree()
     # To update the tree we need hash of all values which is calculated above
     tree.update(hashmap)
-    bTreedKeys[collectionName + '.' + column] = tree
+    bTreedKeys[collectionName + '_' + column] = tree
     print('Created a BTree on ' + column + ' for collection ' + collectionName)
 
 
@@ -263,7 +277,7 @@ def bTreeMatch(collection, column, condition, value):
     value : any
         Value we have to check for
     """
-    bTree = bTreedKeys[collection + '.' + column]
+    bTree = bTreedKeys[collection + '_' + column]
     matched = np.full(len(allCollections[collection]), False)
     # Finding the rows that satisfy the given condition
     if condition == '<':
@@ -359,23 +373,27 @@ def select(outputCollection, collectionName, conditions, operator):
     # Go through all the conditions provided
     for condition in conditions:    
         # If we are finding equal to some value and hash exists on that column, column is on left
-        if condition[1] == '=' and collectionName + '.' + condition[0] in hashedKeys and canEval(condition[2]):
-            print('Using the Hash generated earlier to check for the value')
+        if condition[1] == '=' and collectionName + '_' + condition[0] in hashedKeys and canEval(condition[2]):
+            if outputCollection != None:
+                print('Using the Hash generated earlier to check for the value')
             compare = eval(condition[2])
             result = hashMatch(collectionName, condition[0], compare)
         # If we are finding equal to some value and hash exists on that column, column is on right
-        elif condition[1] == '=' and collectionName + '.' + condition[2] in hashedKeys and canEval(condition[0]):
-            print('Using the Hash generated earlier to check for the value')
+        elif condition[1] == '=' and collectionName + '_' + condition[2] in hashedKeys and canEval(condition[0]):
+            if outputCollection != None:
+                print('Using the Hash generated earlier to check for the value')
             compare = eval(condition[0])
             result = hashMatch(collectionName, condition[2], compare)
         # If we are finding anything except not equal to some value and Btree exists on that column, column is on left
-        elif condition[1] != '!=' and collectionName + '.' + condition[0] in bTreedKeys and canEval(condition[2]):
-            print('Using the Btree generated earlier to check for the value')
+        elif condition[1] != '!=' and collectionName + '_' + condition[0] in bTreedKeys and canEval(condition[2]):
+            if outputCollection != None:
+                print('Using the Btree generated earlier to check for the value')
             compare = eval(condition[2])
             result = bTreeMatch(collectionName, condition[0], condition[1], compare)
         # If we are finding anything except not equal to some value and Btree exists on that column, column is on right
-        elif condition[1] != '!=' and collectionName + '.' + condition[2] in bTreedKeys and canEval(condition[0]):
-            print('Using the Btree generated earlier to check for the value')
+        elif condition[1] != '!=' and collectionName + '_' + condition[2] in bTreedKeys and canEval(condition[0]):
+            if outputCollection != None:
+                print('Using the Btree generated earlier to check for the value')
             compare = eval(condition[0])
             result = bTreeMatch(collectionName, condition[2], condition[1], compare)
         # If Btree and hash dont work, interpret both sides and compare
@@ -661,11 +679,15 @@ def join(outputCollection, leftCollection, rightCollection, conditions, operator
         # Splitting based on . to get columnName
         splitted_left = left[0].split('.')
         replace = [posOfLeftCollection, left[0], leftCollection + '_' + splitted_left[1]]
+        if checkIfIndexed(leftCollection + '_' + splitted_left[1]):
+            print('Using previously indexed column from table ' + leftCollection + ' to speed up the join')
         # finding the occurence of rightCollection.columnName
         right = re.findall(rightCollection + '.[a-zA-Z_$0-9]+', rhs)
-        right = right[0].split('.')
+        splitted_right = right[0].split('.')
         # Replacing rightCollection.columnName with columnName
-        condition[2 - posOfLeftCollection] = re.sub(rightCollection + '.[a-zA-Z_$0-9]+', right[1], rhs)
+        condition[2 - posOfLeftCollection] = re.sub(rightCollection + '.[a-zA-Z_$0-9]+', splitted_right[1], rhs)
+        if checkIfIndexed(rightCollection + '_' + splitted_right[1]):
+            print('Using previously indexed column from table ' + rightCollection + ' to speed up the join')
         # Replace contains an array of format:
         # [positionOfLeftCollection, leftCollection.columnName, leftCollection_columnName]
         replaceAll.append(replace)
