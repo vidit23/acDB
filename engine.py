@@ -370,6 +370,7 @@ def select(outputCollection, collectionName, conditions, operator):
     """
     allResults = []
     collection = allCollections[collectionName]
+    headers = collection.dtype
     # Go through all the conditions provided
     for condition in conditions:    
         # If we are finding equal to some value and hash exists on that column, column is on left
@@ -422,9 +423,12 @@ def select(outputCollection, collectionName, conditions, operator):
     # Take OR of all the results and extract all the rows that are True
     else:
         finalOutcome = np.extract(np.any(allResults, axis = 0), collection)
+
     if outputCollection == None:
         return finalOutcome
     else:
+        if len(finalOutcome) == 0:
+            finalOutcome = np.array([], dtype=headers)
         allCollections[outputCollection] = finalOutcome
         printTable(allCollections[outputCollection])
         outputToFile(outputCollection, 'allOperations', 'a+')
@@ -697,9 +701,11 @@ def join(outputCollection, leftCollection, rightCollection, conditions, operator
     for name in allCollections[leftCollection].dtype.names:
         fieldRename[name] = leftCollection + '_' + name
     leftCollectionRenamed = rfn.rename_fields(allCollections[leftCollection], fieldRename)
+    leftTableHeaders = leftCollectionRenamed.dtype
 
     # Storing but not renaming quite yet the fields of left collection with format leftCollection_columnName because we want to use hash and BTree later
     fieldRename = {} 
+    rightTableHeaders = allCollections[rightCollection].dtype
     for name in allCollections[rightCollection].dtype.names:
         fieldRename[name] = rightCollection + '_' + name
 
@@ -725,6 +731,12 @@ def join(outputCollection, leftCollection, rightCollection, conditions, operator
                 firstTime = 0
             else:
                 joinedCollection = np.concatenate((joinedCollection, joins), axis = 0)
+
+    if len(joinedCollection) == 0:
+        leftEmpty = np.array([], dtype = leftTableHeaders)
+        rightEmpty = np.array([], dtype = rightTableHeaders)
+        rightEmpty = rfn.rename_fields(rightEmpty, fieldRename)
+        joinedCollection = rfn.merge_arrays((leftEmpty, rightEmpty), flatten = True, usemask = False)
 
     allCollections[outputCollection] = joinedCollection
     printTable(allCollections[outputCollection])
