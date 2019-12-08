@@ -1,4 +1,5 @@
 import numpy as np
+import sys
 import time
 
 from parser import parser
@@ -86,13 +87,21 @@ def runDBCommand(command):
 
 # Empties the allOperation file everytime the program runs
 open('vvb238_dk3718_allOperations', 'w+').close()
-while 1:
-    query = input('Enter your query: ')
-    if query == 'quit':
-        break
-    elif query == 'alltest':
-        test.runningFullTest()
-    elif query == 'backtest':
-        test.runningBackendTests()
-    else:
-        runDBCommand(query)
+if len(sys.argv) == 1:
+    while 1:
+        query = input('Enter your query: ')
+        if query == 'quit':
+            break
+        elif query == 'alltest':
+            test.runningFullTest()
+        elif query == 'backtest':
+            test.runningBackendTests()
+        else:
+            runDBCommand(query)
+else:
+    # Reading from file given as argument while running the code
+    with open(sys.argv[1], 'r') as reader:
+        line = reader.readline()
+        while line:
+            runDBCommand(line)
+            line = reader.readline()

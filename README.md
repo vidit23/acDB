@@ -5,7 +5,7 @@
     - Type `quit` to exit the program.
     - Type `alltest` to run all the queries given in the sample file.
     - Type queries according to the command list given below.
-    - Does not accept commands from a file.
+    - Can read commands from a file if it passed as an argument while running the code `python3 main.py ./tests/inputFile`
     
 ### File structure
 1. engine.py - contains the implementation of all the functions
