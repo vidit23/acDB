@@ -1,4 +1,4 @@
-# This project tries to emulate an SQL Database using Python3. 
+# This project implements an in-memory data store that queries like SQL. 
 ### To run the project:
 1. Assuming you have pip installed, run the command `pip3 install -r requirements.txt`
 2. And then, `python3 main.py`
